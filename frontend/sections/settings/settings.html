@@ -1,0 +1,63 @@
+<!-- settings.html -->
+<section id="settings" class="card fade-in">
+  <h2>Configuración</h2>
+  <p>Ajusta tus preferencias de usuario y personaliza tu experiencia en MathBot.IA.</p>
+  <div id="settings-msg" class="muted" style="min-height:1.2rem;margin:.4rem 0 .2rem;color:var(--success);"></div>
+
+  <!-- Perfil del usuario -->
+  <div class="cards-grid" style="margin-top: 1.5rem;">
+    <div class="card">
+      <h3>Información personal</h3>
+      <p><strong>Nombre:</strong> <span id="profile-name">—</span></p>
+      <p><strong>Nivel actual:</strong> <span id="profile-level">—</span></p>
+      <p><strong>Especialidad:</strong> <span id="profile-specialty">No especificada</span></p>
+      <button class="btn btn-ghost" data-action="edit-profile">✏️ Editar perfil</button>
+    </div>
+
+    <div class="card">
+      <h3>Preferencias</h3>
+      <p>Elige cómo deseas que se muestre el contenido:</p>
+      <button class="btn btn-ghost" data-action="toggle-theme">🌓 Cambiar tema</button>
+    </div>
+
+    <div class="card">
+      <h3>Notificaciones</h3>
+      <p>Configura alertas y recordatorios:</p>
+      <label class="switch">
+        <input type="checkbox" id="notifications-toggle" checked>
+        <span class="slider round"></span>
+        Activar notificaciones
+      </label>
+    </div>
+  </div>
+
+  <!-- Opciones avanzadas -->
+  <div class="cards-grid" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>Cuenta</h3>
+      <button class="btn btn-danger" data-action="logout">🚪 Cerrar sesión</button>
+      <button class="btn btn-ghost" data-action="delete-account">🗑️ Eliminar cuenta</button>
+    </div>
+    <div class="card">
+      <h3>Seguridad</h3>
+      <p>Cambiar contraseña</p>
+      <form id="password-form" style="margin-top:.8rem">
+        <div class="field">
+          <label>Contraseña actual</label>
+          <input type="password" name="current_password" required />
+        </div>
+        <div class="field">
+          <label>Nueva contraseña</label>
+          <input type="password" name="new_password" required />
+        </div>
+        <div class="field">
+          <label>Confirmar nueva contraseña</label>
+          <input type="password" name="confirm_password" required />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Actualizar contraseña</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

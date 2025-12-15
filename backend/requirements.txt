@@ -1,0 +1,35 @@
+# --- Servidor y API ---
+fastapi
+uvicorn
+python-dotenv
+
+# --- IA y procesamiento ---
+openai
+transformers
+torch
+numpy
+scipy
+
+# --- Manejo de datos ---
+pandas
+sqlalchemy
+psycopg2-binary
+pg8000
+passlib[bcrypt]>=1.7.4
+bcrypt<4.0.0
+PyJWT>=2.7,<3
+
+# --- PDF ---
+pypdf
+
+# --- OCR ---
+pypdfium2
+pytesseract
+Pillow
+
+# --- Utilidades ---
+requests
+httpx
+pydantic
+python-multipart
+email-validator

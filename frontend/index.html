@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MathBot.IA &mdash; Aprende Matemáticas con IA</title>
+
+  <!-- SEO / Social -->
+  <meta name="description" content="MathBot.IA: Plataforma moderna para aprender matemáticas con IA. Lecciones, chat inteligente, retos y estadísticas con una experiencia de usuario de lujo." />
+  <link rel="canonical" href="/" />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:title" content="MathBot.IA &mdash; Aprende Matemáticas con IA" />
+  <meta property="og:description" content="Lecciones interactivas, chat de IA y progreso en tiempo real." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:site_name" content="MathBot.IA" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220" />
+
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        var theme = (stored === 'dark' || stored === 'light') ? stored : ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (err) {
+        console.warn('theme bootstrap error', err);
+      }
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/img/MATHBOT ICONO.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/img/MATHBOT ICONO.png" />
+  <link rel="shortcut icon" href="assets/img/MATHBOT ICONO.png" type="image/png" />
+
+  <!-- Vendor (defer) -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js" defer></script>
+  <script src="js/theme.js" defer></script>
+
+  <!-- MathJax (render LaTeX en todo el sitio) -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/global.css" />
+</head>
+<body>
+  <!-- Fondo animado -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <noscript>
+    <div style="position:fixed;inset:auto 0 0 0;padding:.6rem 1rem;background:#fee2e2;color:#7f1d1d;text-align:center;z-index:9999">
+      Para la mejor experiencia, activa JavaScript. Las animaciones y el chat requieren JS.
+    </div>
+  </noscript>
+
+  <!-- =======================================================
+       NAVBAR
+  ======================================================== -->
+  <header class="navbar" role="banner">
+    <div class="container nav-wrap">
+      <a class="brand" href="#hero" aria-label="MathBot.IA inicio">
+        <img src="assets/img/MATHBOT ICONO.png" alt="" class="brand-logo" width="28" height="28" decoding="async" fetchpriority="high" />
+        <span class="logo-dot" aria-hidden="true"></span><span>MathBot<span>.IA</span></span>
+      </a>
+
+      <nav aria-label="Principal">
+        <ul>
+          <li><a href="#features">Funciones</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#footer">Contacto</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-cta">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema" type="button" aria-pressed="false">🌙</button>
+        <a href="sections/auth/login.html" class="btn btn-ghost">Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+    <section id="hero" class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy" data-aos="fade-right">
+          <span class="pill">✨ Nuevo • IA explicativa en pasos</span>
+          <h1>
+            Aprende matemáticas con
+            <span class="brand-gradient-text">inteligencia</span>
+          </h1>
+          <p class="lead" id="hero-lead">
+            Explicaciones claras, ejercicios guiados y un <strong>chat inteligente</strong> que resuelve tus dudas al instante. Diseñado para ser
+            <em>amable a la vista</em> y potente en resultados.
+          </p>
+          <div class="hero-actions">
+            <a href="sections/auth/login.html" class="btn btn-primary">Comenzar ahora</a>
+            <a href="#demo" class="btn btn-ghost">Ver una demo</a>
+          </div>
+          <div class="hero-badges" aria-label="Beneficios rápidos">
+            <span class="pill">📈 Progreso en tiempo real</span>
+            <span class="pill">🧩 Ejercicios interactivos</span>
+            <span class="pill">🏅 Logros y retos</span>
+          </div>
+        </div>
+
+        <div class="hero-media" data-aos="fade-left">
+          <div class="mock" role="figure" aria-label="Simulación de chat del tutor IA">
+            <div class="mock-header">
+              <div class="mock-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+              <strong style="font-size:.9rem;color:#334155">Simulación • Chat Tutor</strong>
+              <span class="label">IA Activa</span>
+            </div>
+            <div class="mock-body">
+              <div class="panel">
+                <h4 class="label">Pregunta</h4>
+                <div class="chat-bubble user">¿Cómo resuelvo <code>2x + 5 = 17</code>?</div>
+                <div class="chat-bubble ai">Resta 5 en ambos lados → <code>2x = 12</code>. Luego divide entre 2 → <code>x = 6</code>.</div>
+                <div class="chat-bubble user">¿Y si fuera <code>3x - 2 = 10</code>?</div>
+                <div class="chat-bubble ai">Suma 2: <code>3x = 12</code>. Divide entre 3: <code>x = 4</code>. ✅</div>
+              </div>
+              <div class="panel">
+                <h4 class="label">Paso a paso</h4>
+                <div class="chat-bubble ai">1) Aísla términos con x.</div>
+                <div class="chat-bubble ai">2) Operación inversa a ambos lados.</div>
+                <div class="chat-bubble ai">3) Comprueba el resultado.</div>
+                <div class="chat-bubble user">¡Entendido! 💡</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-floating">⌛ Tiempo medio por ejercicio: <strong>2–4 min</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         TILES / BENEFICIOS
+    ====================================================== -->
+    <section class="tiles" aria-label="Beneficios">
+      <div class="container tiles-grid">
+        <article class="tile" data-aos="fade-up">
+          <div class="icon" aria-hidden="true">🧠</div>
+          <div>
+            <h4>Explicaciones claras</h4>
+            <p>La IA descompone problemas complejos en pasos simples y visuales.</p>
+          </div>
+        </article>
+        <article class="tile" data-aos="fade-up" data-aos-delay="100">
+          <div class="icon" aria-hidden="true">⚡</div>
+          <div>
+            <h4>Respuestas al instante</h4>
+            <p>Chatea con el tutor digital y resuelve dudas sin fricción.</p>
+          </div>
+        </article>
+        <article class="tile" data-aos="fade-up" data-aos-delay="180">
+          <div class="icon" aria-hidden="true">📊</div>
+          <div>
+            <h4>Seguimiento real</h4>
+            <p>Estadísticas, rachas y objetivos semanales que motivan de verdad.</p>
+          </div>
+        </article>
+        <article class="tile" data-aos="fade-up" data-aos-delay="260">
+          <div class="icon" aria-hidden="true">🎯</div>
+          <div>
+            <h4>Rutas personalizadas</h4>
+            <p>Álgebra, geometría, cálculo… a tu ritmo y con retos adaptativos.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         CARACTERÍSTICAS
+    ====================================================== -->
+    <section id="features" class="features">
+      <div class="container">
+        <div class="section-head">
+          <h2>Funciones principales</h2>
+          <div class="kpis" aria-label="Métricas de impacto">
+            <div class="kpi">+150 metas semanales cumplidas</div>
+            <div class="kpi">+12k ejercicios resueltos</div>
+            <div class="kpi">98% reporta más seguridad</div>
+          </div>
+        </div>
+
+        <div class="feature-cards">
+          <article class="f-card" data-aos="zoom-in">
+            <div class="f-card__media" aria-hidden="true"></div>
+            <div class="f-card__body">
+              <h3>Lecciones interactivas</h3>
+              <p>Ejemplos guiados, preguntas activas y feedback inmediato.</p>
+              <div class="f-card__tags" aria-label="Áreas de aprendizaje">
+                <span class="tag">Álgebra</span>
+                <span class="tag">Geometría</span>
+                <span class="tag">Cálculo</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="f-card" data-aos="zoom-in" data-aos-delay="120">
+            <div class="f-card__media" aria-hidden="true"></div>
+            <div class="f-card__body">
+              <h3>Chat inteligente</h3>
+              <p>Explica, pregunta, corrige y propone ejercicios a tu nivel.</p>
+              <div class="f-card__tags">
+                <span class="tag">Sugerencias</span>
+                <span class="tag">Paso a paso</span>
+                <span class="tag">Latex</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="f-card" data-aos="zoom-in" data-aos-delay="200">
+            <div class="f-card__media" aria-hidden="true"></div>
+            <div class="f-card__body">
+              <h3>Estadísticas y logros</h3>
+              <p>Gráficas limpias, metas semanales y medallas por hitos.</p>
+              <div class="f-card__tags">
+                <span class="tag">Rachas</span>
+                <span class="tag">Objetivos</span>
+                <span class="tag">Reportes</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         DEMO / VIDEO
+    ====================================================== -->
+    <section id="demo" class="demo">
+      <div class="container demo-wrap">
+        <div class="screen" data-aos="fade-right">
+          <div class="screen-head">
+            <strong>Vista previa de sesión</strong>
+            <span class="label">Estudiante • Modo guiado</span>
+          </div>
+          <div class="screen-body">
+            <div class="video-thumb">
+              <img src="assets/img/chat-preview.svg" alt="Vista previa de chat interactivo con IA" loading="lazy" decoding="async" />
+              <button class="play-btn" id="openVideo" aria-label="Reproducir video" type="button">▶</button>
+            </div>
+            <p class="meta">Explora cómo el chat guía al estudiante, propone pasos y valida resultados.</p>
+          </div>
+        </div>
+
+        <div class="screen" data-aos="fade-left">
+          <div class="screen-head">
+            <strong>Ejemplo de reporte</strong>
+            <span class="label">Progreso semanal</span>
+          </div>
+          <div class="screen-body">
+            <ul class="list-unstyled">
+              <li>✅ 24 ejercicios completados</li>
+              <li>🔥 Racha actual: 5 días</li>
+              <li>🏅 Logro desbloqueado: “Álgebra esencial”</li>
+              <li>📈 Precisión media: 92%</li>
+            </ul>
+            <div class="chip-row">
+              <span class="pill">CSV export</span>
+              <span class="pill">Compartir con profesor</span>
+              <span class="pill">Recomendar siguiente ruta</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         CÓMO FUNCIONA
+    ====================================================== -->
+    <section class="steps">
+      <div class="container">
+        <h2 class="label">Cómo funciona</h2>
+        <div class="steps-grid">
+          <article class="step" data-aos="fade-up">
+            <span class="num" aria-hidden="true">1</span>
+            <h4>Elige tu ruta</h4>
+            <p>Selecciona un tema y una meta semanal. La IA ajusta la dificultad.</p>
+          </article>
+          <article class="step" data-aos="fade-up" data-aos-delay="120">
+            <span class="num" aria-hidden="true">2</span>
+            <h4>Practica con guía</h4>
+            <p>Resuelve problemas paso a paso con feedback inmediato y pistas.</p>
+          </article>
+          <article class="step" data-aos="fade-up" data-aos-delay="220">
+            <span class="num" aria-hidden="true">3</span>
+            <h4>Mide y mejora</h4>
+            <p>Consulta tu progreso, desbloquea logros y ajusta tu plan.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         PLANES
+    ====================================================== -->
+
+    <!-- =====================================================
+         TESTIMONIOS
+    ====================================================== -->
+    <section class="testimonials" aria-label="Testimonios de estudiantes">
+      <div class="container">
+        <h2 class="text-gradient">Lo que dicen los estudiantes</h2>
+        <div class="t-grid">
+          <article class="t-card" data-aos="fade-up">
+            <div class="t-head">
+              <div class="avatar" aria-hidden="true">A</div>
+              <div><strong>Andrea</strong><div class="stars" aria-label="5 de 5">★★★★★</div></div>
+            </div>
+            <p class="t-quote">“Antes me costaba álgebra. Con el chat paso a paso entendí de verdad. La interfaz es suave y no cansa la vista.”</p>
+          </article>
+          <article class="t-card" data-aos="fade-up" data-aos-delay="120">
+            <div class="t-head">
+              <div class="avatar" aria-hidden="true">J</div>
+              <div><strong>Julián</strong><div class="stars" aria-label="5 de 5">★★★★★</div></div>
+            </div>
+            <p class="t-quote">“Las rutas personalizadas y los logros me mantienen motivado. He subido mi nota un punto.”</p>
+          </article>
+          <article class="t-card" data-aos="fade-up" data-aos-delay="220">
+            <div class="t-head">
+              <div class="avatar" aria-hidden="true">M</div>
+              <div><strong>María</strong><div class="stars" aria-label="4 de 5">★★★★☆</div></div>
+            </div>
+            <p class="t-quote">“El diseño es precioso y la experiencia súper clara. Exporté mi progreso para mi profe en un clic.”</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         FAQ
+    ====================================================== -->
+    <section id="faq" class="faq">
+      <div class="container">
+        <h2 class="text-gradient">Preguntas frecuentes</h2>
+        <div class="faq-grid" role="list">
+          <div class="faq-item" data-aos="fade-up" role="listitem">
+            <button class="faq-q" aria-expanded="false">¿La IA resuelve por mí o me enseña? <span class="ico" aria-hidden="true">⌄</span></button>
+            <div class="faq-a">Te guía con pistas y validaciones, pero tú haces el razonamiento. Así aprendes de verdad.</div>
+          </div>
+          <div class="faq-item" data-aos="fade-up" data-aos-delay="100" role="listitem">
+            <button class="faq-q" aria-expanded="false">¿Puedo usarlo desde el móvil? <span class="ico" aria-hidden="true">⌄</span></button>
+            <div class="faq-a">Sí. Está optimizado para pantallas pequeñas y conserva todas las funciones clave.</div>
+          </div>
+          <div class="faq-item" data-aos="fade-up" data-aos-delay="180" role="listitem">
+            <button class="faq-q" aria-expanded="false">¿Qué pasa si olvido mi racha? <span class="ico" aria-hidden="true">⌄</span></button>
+            <div class="faq-a">No la pierdes de golpe: hay recordatorios y “días de gracia” configurables.</div>
+          </div>
+          <div class="faq-item" data-aos="fade-up" data-aos-delay="260" role="listitem">
+            <button class="faq-q" aria-expanded="false">¿Y los datos? <span class="ico" aria-hidden="true">⌄</span></button>
+            <div class="faq-a">Tus ejercicios y estadísticas se cifran y nunca se comparten con terceros.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         CTA FINAL
+    ====================================================== -->
+    <section id="cta" class="cta">
+      <div class="container cta-wrap">
+        <div class="cta-inner">
+          <div>
+            <span class="pill">🚀 Listo para aprender mejor</span>
+            <h2 style="margin:.6rem 0 8px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Empieza gratis hoy</h2>
+            <p class="lead">Accede a lecciones, chat y seguimiento en un entorno visualmente agradable.</p>
+            <div class="btn-row">
+              <a href="sections/dashboard/dashboard.html" class="btn btn-primary">Crear cuenta</a>
+            </div>
+          </div>
+          <div class="cta-illus" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================
+       FOOTER
+  ====================================================== -->
+  <footer id="footer">
+    <div class="container">
+      <div class="f-row">
+        <div class="f-col">
+          <div class="f-brand">
+            <span class="logo-dot" aria-hidden="true"></span>
+            <strong>MathBot.IA</strong>
+          </div>
+          <p class="muted">Aprender matemáticas puede ser bello y eficaz al mismo tiempo.</p>
+        </div>
+        <div class="f-col">
+          <h5>Producto</h5>
+          <a href="#features">Funciones</a>
+          <a href="#demo">Demo</a>
+          <a href="#faq">Ayuda</a>
+        </div>
+        <div class="f-col">
+          <h5>Recursos</h5>
+          <a href="#">Guías</a>
+          <a href="#">Blog</a>
+          <a href="#">Centro de soporte</a>
+          <a href="#">Estado</a>
+        </div>
+        <div class="f-col">
+          <h5>Legal</h5>
+          <a href="#">Privacidad</a>
+          <a href="#">Términos</a>
+          <a href="#">Licencias</a>
+        </div>
+      </div>
+      <div class="f-bottom">
+        <span>© 2025 MathBot.IA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================================================
+       MODAL VIDEO
+  ====================================================== -->
+  <div class="modal" id="videoModal" aria-hidden="true" role="dialog" aria-label="Video de demostración">
+    <div class="modal-card" role="document">
+      <div class="modal-head">
+        <strong>Demostración • Chat Tutor</strong>
+        <button class="modal-close" id="closeVideo" type="button" aria-label="Cerrar">Cerrar ✕</button>
+      </div>
+      <div class="modal-body">
+        <video id="demoVideo" src="" controls style="width:100%;height:100%;background:#000"></video>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       SCRIPTS (manteniendo animaciones y funciones)
+  ====================================================== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // AOS
+      if (window.AOS) AOS.init({ duration: 900, once: true });
+
+      // Typed.js (hero)
+      const typedTarget = document.getElementById("hero-lead");
+      if (typedTarget && window.Typed) {
+        new Typed("#hero-lead", {
+          strings: [
+            "Explicaciones claras, ejercicios guiados y un <strong>chat inteligente</strong> que resuelve tus dudas al instante.",
+            "Aprende con una interfaz <strong>agradable</strong> y resultados reales.",
+            "Construye hábitos con <strong>metas semanales</strong> y logros."
+          ],
+          typeSpeed: 24,
+          backSpeed: 12,
+          backDelay: 2200,
+          smartBackspace: true,
+          loop: true
+        });
+      }
+
+      // Tema (dark / light)
+      const toggle = document.getElementById("theme-toggle");
+      const themeAPI = window.MathBotTheme;
+      if (toggle && themeAPI) {
+        const setLabel = (theme) => {
+          toggle.textContent = theme === "dark" ? "☀️" : "🌙";
+          toggle.setAttribute("aria-pressed", String(theme === "dark"));
+        };
+        setLabel(themeAPI.getTheme());
+        document.documentElement.addEventListener('themechange', (ev) => setLabel(ev.detail.theme));
+        toggle.addEventListener("click", () => {
+          const next = themeAPI.getTheme() === "dark" ? "light" : "dark";
+          themeAPI.setTheme(next);
+        });
+      } else if (toggle) {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initial = toggle.getAttribute('aria-pressed') === 'true' ? 'dark' : (prefersDark ? 'dark' : 'light');
+        const setFallback = (theme) => {
+          document.body.classList.toggle('dark', theme === 'dark');
+          toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+          toggle.setAttribute('aria-pressed', String(theme === 'dark'));
+        };
+        setFallback(initial);
+        toggle.addEventListener('click', () => {
+          const next = document.body.classList.contains('dark') ? 'light' : 'dark';
+          setFallback(next);
+        });
+      }
+
+      // FAQ
+      const faqItems = document.querySelectorAll(".faq-item");
+      faqItems.forEach((item, idx) => {
+        const btn = item.querySelector(".faq-q");
+        const panel = item.querySelector(".faq-a");
+        if (!btn || !panel) return;
+        const id = panel.id || `faq-a-${idx}`;
+        panel.id = id;
+        btn.setAttribute("aria-controls", id);
+        btn.setAttribute("aria-expanded", "false");
+        btn.type = "button";
+        btn.addEventListener("click", () => {
+          const isOpen = item.classList.toggle("open");
+          btn.setAttribute("aria-expanded", String(isOpen));
+        });
+      });
+
+      // Pricing switch
+      const sw = document.getElementById("billSwitch");
+      const p2 = document.getElementById("p2");
+      const p3 = document.getElementById("p3");
+      if (sw && p2 && p3) {
+        sw.addEventListener("change", () => {
+          if (sw.checked) { p2.textContent = "$115"; p3.textContent = "$260"; }
+          else { p2.textContent = "$12"; p3.textContent = "$29"; }
+        });
+      }
+
+      // Modal video
+      const modal = document.getElementById("videoModal");
+      const openBtn = document.getElementById("openVideo");
+      const closeBtn = document.getElementById("closeVideo");
+      const vid = document.getElementById("demoVideo");
+      let lastFocused = null;
+      const openModal = () => {
+        lastFocused = document.activeElement;
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+        modal.setAttribute("aria-modal", "true");
+        if (vid) { vid.src = "assets/videos/demo.mp4"; vid.play?.(); }
+        closeBtn?.focus();
+      };
+      const closeModal = () => {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+        modal.removeAttribute("aria-modal");
+        if (vid) { vid.pause?.(); vid.currentTime = 0; vid.src = ""; }
+        lastFocused?.focus?.();
+      };
+      openBtn?.addEventListener("click", openModal);
+      closeBtn?.addEventListener("click", closeModal);
+      modal?.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal?.classList.contains("open")) closeModal(); });
+
+      // Partículas (respeta reduced motion)
+      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!prefersReduced && window.tsParticles) {
+        tsParticles.load("bg-canvas", {
+          fpsLimit: 60,
+          particles: {
+            number: { value: 80 },
+            color: { value: ["#0ff", "#06f", "#38bdf8"] },
+            shape: { type: "circle" },
+            opacity: { value: 0.6 },
+            size: { value: { min: 1, max: 3 } },
+            move: { enable: true, speed: 1.5, direction: "none", outModes: "out" },
+            links: { enable: true, distance: 120, color: "#06f", opacity: 0.3, width: 1 }
+          },
+          interactivity: {
+            events: { onHover: { enable: true, mode: "repulse" }, onClick: { enable: true, mode: "push" } }
+          },
+          detectRetina: true
+        });
+      }
+    });
+  </script>
+</body>
+</html>

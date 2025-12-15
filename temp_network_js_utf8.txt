@@ -1,0 +1,41 @@
+﻿// modules/network.js
+import { showTypingIndicator, hideTypingIndicator, renderMessage } from "./ui.js";
+import { sendMessage } from "./chat.js";
+import { getState } from "./storage.js";
+import { updateStatus } from "./utils.js";
+
+export async function sendQuestion(question) {
+  const currentChat = getState().currentChat;
+  if (!currentChat) return;
+
+  showTypingIndicator();
+
+  try {
+    const authRaw = localStorage.getItem('mb_auth');
+    let userId = 'default';
+    try { const a = JSON.parse(authRaw||'null'); if (a && a.id) userId = a.id; } catch {}
+    const res = await fetch("http://127.0.0.1:8000/preguntar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensaje: question, user_id: userId })
+    });
+
+    const data = await res.json();
+    hideTypingIndicator();
+
+    const respuesta = data.respuesta || "Error: no se recibiÃ³ respuesta.";
+    
+    // Guardar mensaje del bot en el chat
+    sendMessage(currentChat.id, { sender: "ai", text: respuesta });
+
+    // Renderizar el mensaje del bot en pantalla
+    renderMessage({ sender: "ai", text: respuesta });
+
+  } catch (err) {
+    hideTypingIndicator();
+    const errorMsg = "Error: no se pudo conectar con el servidor.";
+    sendMessage(currentChat.id, { sender: "ai", text: errorMsg });
+    renderMessage({ sender: "ai", text: errorMsg });
+    updateStatus("Desconectado", false);
+  }
+}

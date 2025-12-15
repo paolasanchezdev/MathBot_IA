@@ -1,0 +1,144 @@
+<!-- games.html -->
+<section id="games" class="card fade-in">
+  <header class="section-header">
+    <div class="section-title">
+      <h2>Laboratorio de retos</h2>
+      <p class="muted">Pon a prueba tus habilidades con sesiones dinamicas, quizzes basados en tus lecciones y un modo examen integral.</p>
+    </div>
+    <div class="welcome-meta">
+      <span class="pill" id="games-tag">Entrenamiento adaptativo</span>
+      <span class="pill subtle" id="games-progress" hidden></span>
+    </div>
+  </header>
+
+  <p class="muted" id="games-summary">Cargando datos de tus lecciones...</p>
+
+  <div class="games-grid">
+    <article class="game-card game-card--quick" id="quick-math-card">
+      <header class="game-head">
+        <div class="head-copy">
+          <h3>Calculo relampago</h3>
+          <p class="game-subtitle">Mejora tu velocidad resolviendo operaciones adaptadas a tu racha de estudio.</p>
+        </div>
+        <div class="meta-inline">
+          <span class="pill">Mejor: <strong id="qm-best">0</strong></span>
+          <button class="btn btn-primary" id="qm-start">Iniciar</button>
+        </div>
+      </header>
+      <div class="game-body">
+        <div class="timer" id="qm-timer" aria-hidden="true" hidden>
+          <div class="bar" id="qm-timer-bar"></div>
+        </div>
+
+        <div class="scoreboard">
+          <div>Tiempo: <strong id="qm-time">60</strong>s</div>
+          <div class="streak" id="qm-streak" hidden><span class="flame"></span><span>Racha: <strong id="qm-streak-val">0</strong>x</span></div>
+          <div>Puntos: <strong id="qm-score">0</strong></div>
+        </div>
+
+        <div id="qm-area" class="qm-area" hidden>
+          <div class="question">
+            <div id="qm-question" class="expr">?</div>
+            <form id="qm-form" autocomplete="off" class="controls">
+              <input id="qm-answer" type="number" inputmode="numeric" placeholder="Tu respuesta" />
+              <button class="btn btn-primary" type="submit">OK</button>
+            </form>
+            <div id="qm-feedback" class="feedback muted" role="status"></div>
+          </div>
+        </div>
+
+        <div class="game-results" id="qm-results" hidden>
+          <h4 id="qm-result-title">Buen trabajo!</h4>
+          <div class="result-stats">
+            <div><span>Puntos logrados</span><strong id="qm-result-score">0</strong></div>
+            <div><span>Tu mejor marca</span><strong id="qm-result-best">0</strong></div>
+          </div>
+          <div class="result-actions">
+            <button type="button" class="btn btn-primary" id="qm-results-retry">Intentar de nuevo</button>
+            <button type="button" class="btn btn-ghost" id="qm-results-close">Ocultar resultados</button>
+          </div>
+        </div>
+
+        <footer class="game-footer" id="qm-recommend" hidden>
+          <p class="muted small">Recomendado para repasar:</p>
+          <button type="button" class="link-btn" id="qm-go-lesson"></button>
+        </footer>
+      </div>
+    </article>
+
+    <article class="game-card game-card--quiz" id="lesson-quiz-card">
+      <header class="game-head">
+        <div class="head-copy">
+          <h3>Quiz de lecciones</h3>
+          <p class="game-subtitle">Reconoce cada leccion a partir de su teoria y fortalece tu memoria a largo plazo.</p>
+        </div>
+        <div class="meta-inline">
+          <span class="pill">Mejor: <strong id="lq-best">0</strong></span>
+          <button class="btn btn-primary" id="lq-start">Comenzar</button>
+        </div>
+      </header>
+      <div class="game-body">
+        <div class="game-controls">
+          <label for="lq-area" class="small muted">Area a practicar</label>
+          <select id="lq-area" aria-label="Selecciona area para el quiz"></select>
+        </div>
+
+        <div class="quiz-panel" id="lq-panel" hidden>
+          <div class="quiz-meta">
+            <span>Pregunta <strong id="lq-counter">1</strong>/5</span>
+            <span>Buenas: <strong id="lq-score">0</strong></span>
+          </div>
+          <p class="quiz-prompt" id="lq-prompt"></p>
+          <div class="quiz-options" id="lq-options"></div>
+          <div class="quiz-feedback" id="lq-feedback" role="status"></div>
+        </div>
+
+        <div class="quiz-summary" id="lq-summary" hidden></div>
+      </div>
+    </article>
+
+    <article class="game-card game-card--exam" id="exam-mode-card">
+      <header class="game-head">
+        <div class="head-copy">
+          <h3>Modo examen</h3>
+          <p class="game-subtitle">Combina teoria y ejercicios practicos inspirados en tus lecciones recientes.</p>
+        </div>
+        <div class="meta-inline">
+          <span class="pill">Mejor: <strong id="em-best">0</strong></span>
+          <button class="btn btn-primary" id="em-start">Iniciar</button>
+        </div>
+      </header>
+      <div class="game-body">
+        <div class="game-controls">
+          <label for="em-area" class="small muted">Area de enfoque</label>
+          <select id="em-area" aria-label="Selecciona el area para el examen"></select>
+        </div>
+
+        <div class="exam-panel" id="em-panel" hidden>
+          <div class="exam-meta">
+            <span>Pregunta <strong id="em-counter">1</strong>/<span id="em-total">6</span></span>
+            <span>Puntaje: <strong id="em-score">0</strong></span>
+          </div>
+          <h4 class="exam-title" id="em-title">Pregunta</h4>
+          <p class="exam-prompt" id="em-prompt"></p>
+          <div class="exam-options" id="em-options"></div>
+          <form id="em-form" class="exam-form" autocomplete="off" hidden>
+            <input id="em-answer" type="number" inputmode="numeric" placeholder="Tu resultado" />
+            <button type="submit" class="btn btn-primary">Responder</button>
+          </form>
+          <div class="exam-feedback" id="em-feedback" role="status"></div>
+        </div>
+
+        <div class="exam-summary" id="em-summary" hidden>
+          <h4>Resumen del examen</h4>
+          <p><strong>Resultado:</strong> <span id="em-summary-score">0/0</span></p>
+          <p class="muted small" id="em-summary-detail"></p>
+          <div class="result-actions">
+            <button type="button" class="btn btn-primary" id="em-retry">Repetir examen</button>
+            <button type="button" class="btn btn-ghost" id="em-open-lesson" hidden>Reforzar leccion</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

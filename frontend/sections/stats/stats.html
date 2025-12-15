@@ -1,0 +1,55 @@
+<!-- stats.html -->
+<section id="stats" class="card fade-in">
+  <header class="section-header">
+    <h2>Estadisticas</h2>
+    <div class="welcome-meta">
+      <span class="pill" id="stats-pill">Resumen semanal</span>
+      <span class="pill subtle" id="stats-progress-pill" hidden></span>
+    </div>
+    <p class="muted" id="stats-summary">Cargando tus numeros...</p>
+  </header>
+
+  <div class="stats-grid">
+    <article class="stat-card">
+      <h3>Lecciones completadas</h3>
+      <div class="stat-value"><strong id="stats-lessons-complete">0</strong>/<span id="stats-lessons-total">0</span></div>
+      <div class="progress">
+        <div class="progress-bar" id="stats-lesson-progress"></div>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <h3>Unidades dominadas</h3>
+      <p class="stat-value" id="stats-units">0</p>
+      <p class="stat-detail" id="stats-next-unit">Aun no comienzas ninguna unidad.</p>
+    </article>
+
+    <article class="stat-card">
+      <h3>Racha de estudio</h3>
+      <p class="stat-value"><span id="stats-streak">0</span> dias</p>
+      <p class="stat-detail" id="stats-last-activity">Activa tu primera racha completando una leccion.</p>
+    </article>
+
+    <article class="stat-card">
+      <h3>Leccion sugerida</h3>
+      <button class="link-btn" type="button" id="stats-next-lesson">Explorar leccion</button>
+      <p class="stat-detail" id="stats-next-lesson-detail">Elige una leccion pendiente para continuar.</p>
+    </article>
+  </div>
+
+  <div class="stats-charts">
+    <article class="chart-card">
+      <h3>Actividad de la semana</h3>
+      <canvas id="chart-week-stats" height="180"></canvas>
+    </article>
+    <article class="chart-card">
+      <h3>Distribucion por area</h3>
+      <canvas id="chart-areas-stats" height="180"></canvas>
+    </article>
+  </div>
+
+  <section class="stats-recommendations">
+    <h3>Objetivos sugeridos</h3>
+    <div id="stats-recommendations" class="recommendations-grid"></div>
+  </section>
+</section>

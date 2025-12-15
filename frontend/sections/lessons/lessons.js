@@ -1,0 +1,5158 @@
+// lessons.js
+
+
+
+
+
+
+
+window.initLessonsSection = function() {
+
+
+
+
+
+
+
+  const cssHref = '../lessons/lessons.css';
+
+
+
+
+
+
+
+  try {
+
+
+
+
+
+
+
+    if (!document.querySelector(`link[data-lessons-css="true"][href$="${cssHref}"]`)) {
+
+
+
+
+
+
+
+      const link = document.createElement('link');
+
+
+
+
+
+
+
+      link.rel = 'stylesheet';
+
+
+
+
+
+
+
+      link.href = cssHref;
+
+
+
+
+
+
+
+      link.dataset.lessonsCss = 'true';
+
+
+
+
+
+
+
+      document.head.appendChild(link);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  } catch (err) {
+
+
+
+
+
+
+
+    console.warn('lessons css injection failed', err);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const API_BASE = localStorage.getItem('mb_api_base') || 'http://127.0.0.1:8000';
+
+
+
+
+
+
+
+  const contentEl = document.getElementById('lessons-content');
+
+
+
+
+
+
+
+  const statusEl = document.getElementById('lessons-status');
+
+
+
+
+
+
+
+  const filterWrapper = document.getElementById('lessons-filter');
+
+
+
+
+
+
+
+  const filterSelect = document.getElementById('filter-area');
+
+
+
+
+
+
+
+  const breadcrumbsEl = document.getElementById('lessons-breadcrumbs');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  if (!contentEl) return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const AREA_LABELS = {
+
+
+
+
+
+
+
+    precalculo: 'Precalculo',
+
+
+
+
+
+
+
+    algebra: 'Algebra',
+
+
+
+
+
+
+
+    geometria: 'Geometria',
+
+
+
+
+
+
+
+    estadistica: 'Estadistica',
+
+
+
+
+
+
+
+    calculo: 'Calculo',
+
+
+
+
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const state = {
+
+
+
+
+
+
+
+    units: [],
+
+
+
+
+
+
+
+    filter: 'all',
+
+
+
+
+
+
+
+    view: 'units',
+
+
+
+
+
+
+
+    currentUnitId: null,
+
+
+
+
+
+
+
+    currentTopicId: null,
+
+
+
+
+
+
+
+    currentLessonId: null,
+
+
+
+
+
+
+
+    lessonCache: new Map(),
+
+
+
+
+
+
+
+    summaryMessage: '',
+
+
+
+
+
+
+
+    detailData: null,
+
+
+
+
+
+
+
+    detailMessage: '',
+
+
+
+
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const sameId = (a, b) => {
+
+
+
+
+
+
+
+    if (a === null || a === undefined || b === null || b === undefined) return false;
+
+
+
+
+
+
+
+    return String(a) === String(b);
+
+
+
+
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const cacheKeyFor = (id) => {
+
+
+
+
+
+
+
+    if (id === null || id === undefined) return null;
+
+
+
+
+
+
+
+    return String(id);
+
+
+
+
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  let pendingFocusLessonId = null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function formatArea(key) {
+
+
+
+
+
+
+
+    if (!key) return 'Sin area';
+
+
+
+
+
+
+
+    const normalized = String(key).toLowerCase();
+
+
+
+
+
+
+
+    return AREA_LABELS[normalized] || normalized.charAt(0).toUpperCase() + normalized.slice(1);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function setStatus(message, mode) {
+
+
+
+
+
+
+
+    if (!statusEl) return;
+
+
+
+
+
+
+
+    if (!message) {
+
+
+
+
+
+
+
+      statusEl.textContent = '';
+
+
+
+
+
+
+
+      statusEl.dataset.state = '';
+
+
+
+
+
+
+
+      statusEl.hidden = true;
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    statusEl.textContent = message;
+
+
+
+
+
+
+
+    statusEl.dataset.state = mode || 'info';
+
+
+
+
+
+
+
+    statusEl.hidden = false;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function formatLessonLabel(lesson) {
+
+
+
+
+
+
+
+    if (!lesson) return 'Leccion';
+
+
+
+
+
+
+
+    return lesson.numero ? `Leccion ${lesson.numero} - ${lesson.nombre}` : `Leccion ${lesson.nombre}`;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function getUnitById(id) {
+
+
+
+
+
+
+
+    return state.units.find(unit => sameId(unit.id, id));
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function getTopicById(unit, topicId) {
+
+
+
+
+
+
+
+    if (!unit) return null;
+
+
+
+
+
+
+
+    return (unit.temas || []).find(topic => sameId(topic.id, topicId));
+
+
+
+
+
+
+
+  }
+
+
+
+  function getTopicLessons(topic) {
+
+    if (!topic) return [];
+
+    const direct = Array.isArray(topic?.lecciones) ? topic.lecciones : null;
+
+    const fallback = Array.isArray(topic?.lessons) ? topic.lessons : null;
+
+    if (direct && direct.length) return direct;
+
+    if (fallback && fallback.length) return fallback;
+
+    return direct || fallback || [];
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function findLessonLocation(lessonId) {
+
+
+
+
+
+
+
+    for (const unit of state.units) {
+
+
+
+
+
+
+
+      for (const topic of unit.temas || []) {
+
+
+
+
+
+
+
+        const lesson = getTopicLessons(topic).find(item => sameId(item.id, lessonId));
+
+
+
+
+
+
+
+        if (lesson) {
+
+
+
+
+
+
+
+          return { unit, topic, lesson };
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    return null;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function buildFallbackDetail(lessonId) {
+
+
+
+
+
+
+
+    const local = findLessonLocation(lessonId);
+
+
+
+
+
+
+
+    const external = window.MathBotLessons && typeof window.MathBotLessons.getLessonById === 'function'
+
+
+
+
+
+
+
+      ? window.MathBotLessons.getLessonById(lessonId)
+
+
+
+
+
+
+
+      : null;
+
+
+
+
+
+
+
+    if (!local && !external) return null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const lessonData = local ? local.lesson : external;
+
+
+
+
+
+
+
+    const unitData = local ? local.unit : null;
+
+
+
+
+
+
+
+    const topicData = local ? local.topic : null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return {
+
+
+
+
+
+
+
+      id: lessonData?.id || lessonId,
+
+
+
+
+
+
+
+      numero: lessonData?.numero || null,
+
+
+
+
+
+
+
+      nombre: lessonData?.nombre || 'Leccion',
+
+
+
+
+
+
+
+      teoria: '<p>Contenido de la leccion no disponible sin conexion.</p>',
+
+
+
+
+
+
+
+      unidad: unitData ? {
+
+
+
+
+
+
+
+        id: unitData.id,
+
+
+
+
+
+
+
+        numero: unitData.numero,
+
+
+
+
+
+
+
+        titulo: unitData.titulo,
+
+
+
+
+
+
+
+        area: unitData.area || unitData.areaKey || null,
+
+
+
+
+
+
+
+      } : (external ? {
+
+
+
+
+
+
+
+        id: external.unitId,
+
+
+
+
+
+
+
+        numero: external.unitNumero,
+
+
+
+
+
+
+
+        titulo: external.unitTitulo,
+
+
+
+
+
+
+
+        area: external.areaKey || null,
+
+
+
+
+
+
+
+      } : null),
+
+
+
+
+
+
+
+      tema: topicData ? {
+
+
+
+
+
+
+
+        id: topicData.id,
+
+
+
+
+
+
+
+        numero: topicData.numero,
+
+
+
+
+
+
+
+        titulo: topicData.titulo,
+
+
+
+
+
+
+
+      } : (external ? {
+
+
+
+
+
+
+
+        id: external.topicId,
+
+
+
+
+
+
+
+        numero: external.topicNumero,
+
+
+
+
+
+
+
+        titulo: external.topicTitulo,
+
+
+
+
+
+
+
+      } : null),
+
+
+
+
+
+
+
+    };
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function updateFilterVisibility() {
+
+
+
+
+
+
+
+    if (!filterWrapper) return;
+
+
+
+
+
+
+
+    filterWrapper.hidden = state.view !== 'units';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function buildFilterOptions() {
+
+
+
+
+
+
+
+    if (!filterSelect) return;
+
+
+
+
+
+
+
+    const options = new Set();
+
+
+
+
+
+
+
+    state.units.forEach(unit => {
+
+
+
+
+
+
+
+      const key = unit.areaKey || unit.area || 'sin-area';
+
+
+
+
+
+
+
+      if (key !== 'sin-area') options.add(key);
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const previous = state.filter;
+
+
+
+
+
+
+
+    filterSelect.innerHTML = '';
+
+
+
+
+
+
+
+    const optAll = document.createElement('option');
+
+
+
+
+
+
+
+    optAll.value = 'all';
+
+
+
+
+
+
+
+    optAll.textContent = 'Todas';
+
+
+
+
+
+
+
+    filterSelect.appendChild(optAll);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    Array.from(options).sort((a, b) => formatArea(a).localeCompare(formatArea(b))).forEach(key => {
+
+
+
+
+
+
+
+      const option = document.createElement('option');
+
+
+
+
+
+
+
+      option.value = key;
+
+
+
+
+
+
+
+      option.textContent = formatArea(key);
+
+
+
+
+
+
+
+      filterSelect.appendChild(option);
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const next = options.has(previous) ? previous : 'all';
+
+
+
+
+
+
+
+    filterSelect.value = next;
+
+
+
+
+
+
+
+    state.filter = next;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function getFilteredUnits() {
+
+
+
+
+
+
+
+    if (state.filter === 'all') return state.units;
+
+
+
+
+
+
+
+    return state.units.filter(unit => (unit.areaKey || unit.area || 'sin-area') === state.filter);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function createBreadcrumb(label, handler, active) {
+
+
+
+
+
+
+
+    const element = document.createElement(active ? 'span' : 'button');
+
+
+
+
+
+
+
+    element.textContent = label;
+
+
+
+
+
+
+
+    element.className = active ? 'breadcrumb-current' : 'breadcrumb-link';
+
+
+
+
+
+
+
+    if (!active && typeof handler === 'function') {
+
+
+
+
+
+
+
+      element.type = 'button';
+
+
+
+
+
+
+
+      element.addEventListener('click', handler);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    return element;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function renderBreadcrumbs() {
+
+
+
+
+
+
+
+    if (!breadcrumbsEl) return;
+
+
+
+
+
+
+
+    breadcrumbsEl.innerHTML = '';
+
+
+
+
+
+
+
+    breadcrumbsEl.appendChild(createBreadcrumb('Unidades', () => openUnitsView(), state.view === 'units'));
+
+
+
+
+
+
+
+    if (state.view === 'topics' || state.view === 'lessons' || state.view === 'lesson-detail') {
+
+
+
+
+
+
+
+      const unit = getUnitById(state.currentUnitId);
+
+
+
+
+
+
+
+      if (unit) {
+
+
+
+
+
+
+
+        breadcrumbsEl.appendChild(createBreadcrumb(unit.titulo || `Unidad ${unit.numero ?? ''}`, () => openUnit(unit.id), state.view === 'topics'));
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    if (state.view === 'lessons' || state.view === 'lesson-detail') {
+
+
+
+
+
+
+
+      const unit = getUnitById(state.currentUnitId);
+
+
+
+
+
+
+
+      const topic = getTopicById(unit, state.currentTopicId);
+
+
+
+
+
+
+
+      if (topic) {
+
+
+
+
+
+
+
+        breadcrumbsEl.appendChild(createBreadcrumb(topic.titulo || `Tema ${topic.numero ?? ''}`, () => openTopic(state.currentUnitId, topic.id), state.view === 'lessons'));
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    if (state.view === 'lesson-detail') {
+
+
+
+
+
+
+
+      const lesson = state.currentLessonId ? findLessonLocation(state.currentLessonId)?.lesson : null;
+
+
+
+
+
+
+
+      breadcrumbsEl.appendChild(createBreadcrumb(lesson ? lesson.nombre : 'Leccion', null, true));
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function renderUnits() {
+
+
+
+
+
+
+
+    const units = getFilteredUnits();
+
+
+
+
+
+
+
+    if (!units.length) {
+
+
+
+
+
+
+
+      const empty = document.createElement('p');
+
+
+
+
+
+
+
+      empty.className = 'lessons-empty';
+
+
+
+
+
+
+
+      empty.textContent = 'No hay unidades registradas.';
+
+
+
+
+
+
+
+      contentEl.appendChild(empty);
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const grid = document.createElement('div');
+
+
+
+
+
+
+
+    grid.className = 'lessons-grid';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    units.forEach(unit => {
+
+
+
+
+
+
+
+      const card = document.createElement('article');
+
+
+
+
+
+
+
+      card.className = 'lesson-card';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      const header = document.createElement('header');
+
+
+
+
+
+
+
+      header.className = 'card-head';
+
+
+
+
+
+
+
+      const title = document.createElement('h3');
+
+
+
+
+
+
+
+      title.textContent = unit.titulo || `Unidad ${unit.numero ?? ''}`;
+
+
+
+
+
+
+
+      const badge = document.createElement('span');
+
+
+
+
+
+
+
+      badge.className = 'lesson-badge';
+
+
+
+
+
+
+
+      badge.textContent = formatArea(unit.areaKey || unit.area);
+
+
+
+
+
+
+
+      header.appendChild(title);
+
+
+
+
+
+
+
+      header.appendChild(badge);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      const temasCount = typeof unit.temas_count === 'number' ? unit.temas_count : ((unit.temas || []).length);
+
+
+
+
+
+
+
+      const lessonsCount = typeof unit.lecciones_count === 'number' ? unit.lecciones_count : (unit.temas || []).reduce((acc, topic) => acc + ((getTopicLessons(topic)).length), 0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      const meta = document.createElement('p');
+
+
+
+
+
+
+
+      meta.className = 'card-meta';
+
+
+
+
+
+
+
+      meta.textContent = `${temasCount} ${temasCount === 1 ? 'tema' : 'temas'} - ${lessonsCount} ${lessonsCount === 1 ? 'leccion' : 'lecciones'}`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      const action = document.createElement('button');
+
+
+
+
+
+
+
+      action.type = 'button';
+
+
+
+
+
+
+
+      action.className = 'btn';
+
+
+
+
+
+
+
+      action.textContent = 'Ver temas';
+
+
+
+
+
+
+
+      action.addEventListener('click', () => openUnit(unit.id));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      card.appendChild(header);
+
+
+
+
+
+
+
+      card.appendChild(meta);
+
+
+
+
+
+
+
+      card.appendChild(action);
+
+
+
+
+
+
+
+      grid.appendChild(card);
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    contentEl.appendChild(grid);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function renderTopics() {
+
+
+
+
+
+
+
+    const unit = getUnitById(state.currentUnitId);
+
+
+
+
+
+
+
+    if (!unit) {
+
+
+
+
+
+
+
+      renderUnits();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const topics = unit.temas || [];
+
+
+
+
+
+
+
+    if (!topics.length) {
+
+
+
+
+
+
+
+      const empty = document.createElement('p');
+
+
+
+
+
+
+
+      empty.className = 'lessons-empty';
+
+
+
+
+
+
+
+      empty.textContent = 'Esta unidad no tiene temas registrados.';
+
+
+
+
+
+
+
+      contentEl.appendChild(empty);
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const list = document.createElement('div');
+
+
+
+
+
+
+
+    list.className = 'lessons-grid';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    topics.forEach(topic => {
+
+
+
+
+
+
+
+      const card = document.createElement('article');
+
+
+
+
+
+
+
+      card.className = 'lesson-card';
+
+
+
+
+
+
+
+      const title = document.createElement('h3');
+
+
+
+
+
+
+
+      title.textContent = topic.titulo || `Tema ${topic.numero ?? ''}`;
+
+
+
+
+
+
+
+      const meta = document.createElement('p');
+
+
+
+
+
+
+
+      meta.className = 'card-meta';
+
+
+
+
+
+
+
+      const count = typeof topic.lecciones_count === 'number' ? topic.lecciones_count : ((getTopicLessons(topic)).length);
+
+
+
+
+
+
+
+      meta.textContent = `${count} ${count === 1 ? 'leccion' : 'lecciones'}`;
+
+
+
+
+
+
+
+      const action = document.createElement('button');
+
+
+
+
+
+
+
+      action.type = 'button';
+
+
+
+
+
+
+
+      action.className = 'btn';
+
+
+
+
+
+
+
+      action.textContent = 'Ver lecciones';
+
+
+
+
+
+
+
+      action.addEventListener('click', () => openTopic(unit.id, topic.id));
+
+
+
+
+
+
+
+      card.appendChild(title);
+
+
+
+
+
+
+
+      card.appendChild(meta);
+
+
+
+
+
+
+
+      card.appendChild(action);
+
+
+
+
+
+
+
+      list.appendChild(card);
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    contentEl.appendChild(list);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function renderLessonsList() {
+
+
+
+
+
+
+
+    const unit = getUnitById(state.currentUnitId);
+
+
+
+
+
+
+
+    const topic = getTopicById(unit, state.currentTopicId);
+
+
+
+
+
+
+
+    if (!unit || !topic) {
+
+
+
+
+
+
+
+      renderUnits();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const lessons = getTopicLessons(topic);
+
+
+
+
+
+
+
+    if (!lessons.length) {
+
+
+
+
+
+
+
+      const empty = document.createElement('p');
+
+
+
+
+
+
+
+      empty.className = 'lessons-empty';
+
+
+
+
+
+
+
+      empty.textContent = 'Este tema no tiene lecciones registradas.';
+
+
+
+
+
+
+
+      contentEl.appendChild(empty);
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const list = document.createElement('div');
+
+
+
+
+
+
+
+    list.className = 'lessons-grid';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    lessons.forEach(lesson => {
+
+
+
+
+
+
+
+      const card = document.createElement('article');
+
+
+
+
+
+
+
+      card.className = 'lesson-card';
+
+
+
+
+
+
+
+      const title = document.createElement('h3');
+
+
+
+
+
+
+
+      title.textContent = lesson.nombre || 'Leccion sin titulo';
+
+
+
+
+
+
+
+      const meta = document.createElement('p');
+
+
+
+
+
+
+
+      meta.className = 'card-meta';
+
+
+
+
+
+
+
+      meta.textContent = lesson.numero ? `Leccion ${lesson.numero}` : 'Leccion';
+
+
+
+
+
+
+
+      const preview = document.createElement('p');
+
+
+
+
+
+
+
+      preview.className = 'card-description';
+
+
+
+
+
+
+
+      preview.textContent = lesson.preview || 'Vista previa no disponible.';
+
+
+
+
+
+
+
+      const action = document.createElement('button');
+
+
+
+
+
+
+
+      action.type = 'button';
+
+
+
+
+
+
+
+      action.className = 'btn';
+
+
+
+
+
+
+
+      action.textContent = 'Abrir leccion';
+
+
+
+
+
+
+
+      action.addEventListener('click', () => openLesson(unit.id, topic.id, lesson));
+
+
+
+
+
+
+
+      card.appendChild(title);
+
+
+
+
+
+
+
+      card.appendChild(meta);
+
+
+
+
+
+
+
+      card.appendChild(preview);
+
+
+
+
+
+
+
+      card.appendChild(action);
+
+
+
+
+
+
+
+      list.appendChild(card);
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    contentEl.appendChild(list);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function renderLessonDetail(detail) {
+
+
+
+
+
+
+
+    const wrapper = document.createElement('article');
+
+
+
+
+
+
+
+    wrapper.className = 'lesson-detail';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const title = document.createElement('h3');
+
+
+
+
+
+
+
+    title.textContent = detail.nombre || 'Leccion';
+
+
+
+
+
+
+
+    wrapper.appendChild(title);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const meta = document.createElement('div');
+
+
+
+
+
+
+
+    meta.className = 'lesson-meta';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (detail.numero) {
+
+
+
+
+
+
+
+      const code = document.createElement('span');
+
+
+
+
+
+
+
+      code.textContent = `Leccion ${detail.numero}`;
+
+
+
+
+
+
+
+      meta.appendChild(code);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    if (detail.unidad) {
+
+
+
+
+
+
+
+      const unitSpan = document.createElement('span');
+
+
+
+
+
+
+
+      unitSpan.textContent = `Unidad ${detail.unidad.numero ?? ''} - ${detail.unidad.titulo || ''}`;
+
+
+
+
+
+
+
+      meta.appendChild(unitSpan);
+
+
+
+
+
+
+
+      if (detail.unidad.area) {
+
+
+
+
+
+
+
+        const areaSpan = document.createElement('span');
+
+
+
+
+
+
+
+        areaSpan.textContent = formatArea(detail.unidad.area);
+
+
+
+
+
+
+
+        meta.appendChild(areaSpan);
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    if (detail.tema) {
+
+
+
+
+
+
+
+      const topicSpan = document.createElement('span');
+
+
+
+
+
+
+
+      topicSpan.textContent = `Tema ${detail.tema.numero ?? ''} - ${detail.tema.titulo || ''}`;
+
+
+
+
+
+
+
+      meta.appendChild(topicSpan);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    wrapper.appendChild(meta);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const body = document.createElement('article');
+
+
+
+
+
+
+
+    body.className = 'lesson-body';
+
+
+
+
+
+
+
+    body.innerHTML = detail.teoria || '<em>Contenido no disponible.</em>';
+
+
+
+
+
+
+
+    wrapper.appendChild(body);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const actions = document.createElement('div');
+
+
+
+
+
+
+
+    actions.className = 'actions-row';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const backBtn = document.createElement('button');
+
+
+
+
+
+
+
+    backBtn.type = 'button';
+
+
+
+
+
+
+
+    backBtn.className = 'btn-back';
+
+
+
+
+
+
+
+    backBtn.textContent = 'Volver';
+
+
+
+
+
+
+
+    backBtn.addEventListener('click', () => {
+
+
+
+
+
+
+
+      openTopic(state.currentUnitId, state.currentTopicId);
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+    actions.appendChild(backBtn);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const markBtn = document.createElement('button');
+
+
+
+
+
+
+
+    markBtn.type = 'button';
+
+
+
+
+
+
+
+    markBtn.className = 'btn-action';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function updateMarkButton() {
+
+
+
+
+
+
+
+      const done = window.MathBotProgress && typeof window.MathBotProgress.isCompleted === 'function'
+
+
+
+
+
+
+
+        ? window.MathBotProgress.isCompleted(detail.id)
+
+
+
+
+
+
+
+        : false;
+
+
+
+
+
+
+
+      markBtn.textContent = done ? 'Marcar como pendiente' : 'Marcar como completada';
+
+
+
+
+
+
+
+      markBtn.dataset.completed = done ? 'true' : 'false';
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    markBtn.addEventListener('click', () => {
+
+
+
+
+
+
+
+      const done = window.MathBotProgress && typeof window.MathBotProgress.isCompleted === 'function'
+
+
+
+
+
+
+
+        ? window.MathBotProgress.isCompleted(detail.id)
+
+
+
+
+
+
+
+        : false;
+
+
+
+
+
+
+
+      const next = !done;
+
+
+
+
+
+
+
+      if (window.MathBotProgress && typeof window.MathBotProgress.markLesson === 'function') {
+
+
+
+
+
+
+
+        window.MathBotProgress.markLesson(detail.id, { completed: next });
+
+
+
+
+
+
+
+      } else {
+
+
+
+
+
+
+
+        window.dispatchEvent(new CustomEvent('lessons:completed', { detail: { lessonId: detail.id, completed: next } }));
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+      updateMarkButton();
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    updateMarkButton();
+
+
+
+
+
+
+
+    actions.appendChild(markBtn);
+
+
+
+
+
+
+
+    wrapper.appendChild(actions);
+
+
+
+
+
+
+
+    contentEl.appendChild(wrapper);
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function render() {
+
+
+
+
+
+
+
+    if (!contentEl) return;
+
+
+
+
+
+
+
+    contentEl.innerHTML = '';
+
+
+
+
+
+
+
+    updateFilterVisibility();
+
+
+
+
+
+
+
+    renderBreadcrumbs();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (state.view === 'units') {
+
+
+
+
+
+
+
+      if (state.summaryMessage) setStatus(state.summaryMessage, 'info');
+
+
+
+
+
+
+
+      renderUnits();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (state.view === 'topics') {
+
+
+
+
+
+
+
+      setStatus('', '');
+
+
+
+
+
+
+
+      renderTopics();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (state.view === 'lessons') {
+
+
+
+
+
+
+
+      setStatus('', '');
+
+
+
+
+
+
+
+      renderLessonsList();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (state.view === 'lesson-detail') {
+
+
+
+
+
+
+
+      setStatus('', '');
+
+
+
+
+
+
+
+      const cached = state.lessonCache.get(cacheKeyFor(state.currentLessonId));
+
+
+
+
+
+
+
+      if (cached) {
+
+
+
+
+
+
+
+        renderLessonDetail(cached);
+
+
+
+
+
+
+
+      } else {
+
+
+
+
+
+
+
+        const loading = document.createElement('p');
+
+
+
+
+
+
+
+        loading.className = 'lessons-empty';
+
+
+
+
+
+
+
+        loading.textContent = 'Cargando contenido de la leccion...';
+
+
+
+
+
+
+
+        contentEl.appendChild(loading);
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function openUnitsView() {
+
+
+
+
+
+
+
+    state.view = 'units';
+
+
+
+
+
+
+
+    state.currentUnitId = null;
+
+
+
+
+
+
+
+    state.currentTopicId = null;
+
+
+
+
+
+
+
+    state.currentLessonId = null;
+
+
+
+
+
+
+
+    state.detailData = null;
+
+
+
+
+
+
+
+    state.detailMessage = '';
+
+
+
+
+
+
+
+    render();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function openUnit(unitId) {
+
+
+
+
+
+
+
+    state.view = 'topics';
+
+
+
+
+
+
+
+    state.currentUnitId = unitId;
+
+
+
+
+
+
+
+    state.currentTopicId = null;
+
+
+
+
+
+
+
+    state.currentLessonId = null;
+
+
+
+
+
+
+
+    state.detailData = null;
+
+
+
+
+
+
+
+    state.detailMessage = '';
+
+
+
+
+
+
+
+    render();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function openTopic(unitId, topicId) {
+
+
+
+
+
+
+
+    const unit = getUnitById(unitId);
+
+
+
+
+
+
+
+    if (!unit) {
+
+
+
+
+
+
+
+      openUnitsView();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    state.view = 'lessons';
+
+
+
+
+
+
+
+    state.currentUnitId = unitId;
+
+
+
+
+
+
+
+    state.currentTopicId = topicId;
+
+
+
+
+
+
+
+    state.currentLessonId = null;
+
+
+
+
+
+
+
+    state.detailData = null;
+
+
+
+
+
+
+
+    state.detailMessage = '';
+
+
+
+
+
+
+
+    render();
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async function openLesson(unitId, topicId, lesson) {
+
+
+
+
+
+
+
+    const unit = getUnitById(unitId);
+
+
+
+
+
+
+
+    const topic = getTopicById(unit, topicId);
+
+
+
+
+
+
+
+    if (!unit || !topic) {
+
+
+
+
+
+
+
+      openUnitsView();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    state.view = 'lesson-detail';
+
+
+
+
+
+
+
+    state.currentUnitId = unitId;
+
+
+
+
+
+
+
+    state.currentTopicId = topicId;
+
+
+
+
+
+
+
+    state.currentLessonId = lesson.id;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const cacheKey = cacheKeyFor(lesson.id);
+
+
+
+
+
+
+
+    const cached = cacheKey !== null ? state.lessonCache.get(cacheKey) : null;
+
+
+
+
+
+
+
+    if (cached) {
+
+
+
+
+
+
+
+      render();
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    render();
+
+
+
+
+
+
+
+    setStatus('Cargando leccion...', 'loading');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    try {
+
+
+
+
+
+
+
+      const response = await fetch(`${API_BASE}/lessons/${lesson.id}`);
+
+
+
+
+
+
+
+      if (!response.ok) {
+
+
+
+
+
+
+
+        throw new Error(`HTTP ${response.status}`);
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+      const detail = await response.json();
+
+
+
+
+
+
+
+      if (cacheKey !== null) {
+
+
+
+
+
+
+
+      state.lessonCache.set(cacheKey, detail);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+      state.detailMessage = '';
+
+
+
+
+
+
+
+      state.detailData = detail;
+
+
+
+
+
+
+
+      setStatus('', '');
+
+
+
+
+
+
+
+      if (state.currentLessonId === lesson.id) {
+
+
+
+
+
+
+
+        render();
+
+
+
+
+
+
+
+        notifyLessonOpened(detail);
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    } catch (error) {
+
+
+
+
+
+
+
+      console.error('lesson detail fallback', error);
+
+
+
+
+
+
+
+      const fallback = buildFallbackDetail(lesson.id);
+
+
+
+
+
+
+
+      if (fallback) {
+
+
+
+
+
+
+
+        if (cacheKey !== null) {
+
+
+
+
+
+
+
+        state.lessonCache.set(cacheKey, fallback);
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+        state.detailData = fallback;
+
+
+
+
+
+
+
+        state.detailMessage = 'Mostrando informacion sin conexion.';
+
+
+
+
+
+
+
+        setStatus('Contenido mostrado sin conexion.', 'info');
+
+
+
+
+
+
+
+        render();
+
+
+
+
+
+
+
+        notifyLessonOpened(fallback);
+
+
+
+
+
+
+
+      } else {
+
+
+
+
+
+
+
+        setStatus('No se pudo cargar la leccion seleccionada.', 'error');
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function focusLessonById(lessonId) {
+
+
+
+
+
+
+
+    if (lessonId === null || lessonId === undefined) return false;
+
+
+
+
+
+
+
+    const cacheKey = cacheKeyFor(lessonId);
+
+
+
+    const targetId = cacheKey !== null && cacheKey !== undefined ? cacheKey : lessonId;
+
+
+
+
+
+
+
+    const location = findLessonLocation(targetId);
+
+
+
+
+
+
+
+    if (!location) {
+
+
+
+
+
+
+
+      pendingFocusLessonId = targetId;
+
+
+
+
+
+
+
+      return false;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    pendingFocusLessonId = null;
+
+
+
+
+
+
+
+    state.filter = 'all';
+
+
+
+
+
+
+
+    openLesson(location.unit.id, location.topic.id, location.lesson);
+
+
+
+
+
+
+
+    return true;
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function notifyLessonOpened(detail) {
+
+
+
+
+
+
+
+    if (!detail) return;
+
+
+
+
+
+
+
+    window.dispatchEvent(new CustomEvent('lessons:opened', { detail: { lessonId: detail.id } }));
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async function loadData() {
+
+
+
+
+
+
+
+    setStatus('Cargando lecciones...', 'loading');
+
+
+
+
+
+
+
+    try {
+
+
+
+
+
+
+
+      if (window.MathBotLessons && typeof window.MathBotLessons.ready === 'function') {
+
+
+
+
+
+
+
+        await window.MathBotLessons.ready();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    } catch (err) {
+
+
+
+
+
+
+
+      console.warn('MathBotLessons ready failed', err);
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const index = window.MathBotLessons && typeof window.MathBotLessons.getIndex === 'function'
+
+
+
+
+
+
+
+      ? window.MathBotLessons.getIndex()
+
+
+
+
+
+
+
+      : null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (index && Array.isArray(index.units) && index.units.length) {
+
+
+
+
+
+
+
+      state.lessonCache.clear();
+
+
+
+
+
+
+
+      state.units = index.units.map(unit => ({
+        ...unit,
+        temas: (unit.temas || []).map(topic => {
+          const lessonList = getTopicLessons(topic);
+          const count = typeof topic.lecciones_count === 'number' ? topic.lecciones_count : lessonList.length;
+          return { ...topic, lecciones: lessonList, lessons: lessonList, lecciones_count: count };
+        }),
+      }));
+
+
+
+
+
+
+
+      const totalLessons = index.totals?.lessons ?? 0;
+
+
+
+
+
+
+
+      state.summaryMessage = `${state.units.length} ${state.units.length === 1 ? 'unidad' : 'unidades'} - ${totalLessons} ${totalLessons === 1 ? 'leccion' : 'lecciones'} disponibles.`;
+
+
+
+
+
+
+
+      buildFilterOptions();
+
+
+
+
+
+
+
+      const handledFocus = pendingFocusLessonId !== null && pendingFocusLessonId !== undefined ? focusLessonById(pendingFocusLessonId) : false;
+
+
+
+
+
+
+
+      if (!handledFocus) {
+
+
+
+
+
+
+
+        openUnitsView();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+      return;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    setStatus('No se pudieron cargar las lecciones.', 'error');
+
+
+
+
+
+
+
+    contentEl.innerHTML = '<p class="lessons-empty">No se pudo obtener informacion de las lecciones.</p>';
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  if (filterSelect) {
+
+
+
+
+
+
+
+    filterSelect.addEventListener('change', () => {
+
+
+
+
+
+
+
+      state.filter = filterSelect.value || 'all';
+
+
+
+
+
+
+
+      openUnitsView();
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  if (window.MathBotLessons && typeof window.MathBotLessons.subscribe === 'function') {
+
+
+
+
+
+
+
+    window.MathBotLessons.subscribe(payload => {
+
+
+
+
+
+
+
+      if (!payload || !payload.data) return;
+
+
+
+
+
+
+
+      const index = window.MathBotLessons.getIndex();
+
+
+
+
+
+
+
+      if (!index) return;
+
+
+
+
+
+
+
+      state.units = index.units.map(unit => ({
+        ...unit,
+        temas: (unit.temas || []).map(topic => {
+          const lessonList = getTopicLessons(topic);
+          const count = typeof topic.lecciones_count === 'number' ? topic.lecciones_count : lessonList.length;
+          return { ...topic, lecciones: lessonList, lessons: lessonList, lecciones_count: count };
+        }),
+      }));
+
+
+
+
+
+
+
+      buildFilterOptions();
+
+
+
+
+
+
+
+      const handledFocus = pendingFocusLessonId !== null && pendingFocusLessonId !== undefined ? focusLessonById(pendingFocusLessonId) : false;
+
+
+
+
+
+
+
+      if (!handledFocus) {
+
+
+
+
+
+
+
+        render();
+
+
+
+
+
+
+
+      }
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  window.addEventListener('lessons:focus-request', event => {
+
+
+
+
+
+
+
+    const lessonId = event?.detail?.lessonId;
+
+
+
+
+
+
+
+    if (lessonId === null || lessonId === undefined) return;
+
+
+
+
+
+
+
+    focusLessonById(lessonId);
+
+
+
+
+
+
+
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  loadData();
+
+
+
+
+
+
+
+};
+
+
+
+
+
+
+

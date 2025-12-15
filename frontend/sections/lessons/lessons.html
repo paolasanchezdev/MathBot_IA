@@ -1,0 +1,29 @@
+<!-- sections/lessons/lessons.html -->
+<link rel="stylesheet" href="../lessons/lessons.css">
+<section id="lessons" class="card fade-in">
+  <header class="section-header">
+    <h2>Lecciones</h2>
+    <p>Explora tus lecciones y avanza paso a paso por unidades, temas y contenidos.</p>
+  </header>
+
+  <div class="lessons-toolbar">
+    <nav id="lessons-breadcrumbs" class="lessons-breadcrumbs" aria-label="Ruta de navegacion"></nav>
+    <div class="filter-wrapper" id="lessons-filter">
+      <label for="filter-area">Filtrar por area:</label>
+      <select id="filter-area">
+        <option value="all">Todas</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="lessons-status" class="lessons-status" role="status" aria-live="polite"></div>
+
+  <div id="lessons-content" class="lessons-content"></div>
+</section>
+
+<script src="lessons.js" defer></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.initLessonsSection) initLessonsSection();
+  });
+</script>

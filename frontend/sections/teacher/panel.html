@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathBot.IA - Panel Docente</title>
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="panel.css" />
+  <link rel="icon" href="../../assets/img/MATHBOT ICONO.png" />
+  <link rel="apple-touch-icon" href="../../assets/img/MATHBOT ICONO.png" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220" />
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        var theme = (stored === 'dark' || stored === 'light') ? stored : ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (err) {
+        console.warn('theme bootstrap error', err);
+      }
+    })();
+  </script>
+  <script src="../../js/theme.js" defer></script>
+  <script src="panel.js" defer></script>
+</head>
+<body>
+  <div class="teacher-app">
+    <header class="teacher-header">
+      <div class="teacher-header-inner">
+        <div class="teacher-brand-block">
+          <div class="teacher-brand">
+            <img src="../../assets/img/MATHBOTLOGO 2.png" alt="MathBot.IA" class="teacher-logo" />
+            <div>
+              <span class="teacher-kicker">MathBot.IA</span>
+              <h1 class="teacher-title">Panel docente</h1>
+            </div>
+          </div>
+          <p class="teacher-subtitle" id="teacher-summary-text">Gestiona a tus estudiantes y el progreso por especialidad.</p>
+        </div>
+        <div class="teacher-actions">
+          <button class="btn btn-ghost" id="teacher-theme-toggle" type="button">Tema</button>
+          <button class="btn btn-primary" id="teacher-logout" type="button">Cerrar sesion</button>
+        </div>
+      </div>
+      <div class="teacher-meta-bar" id="teacher-meta-bar">
+        <div class="teacher-meta-item">
+          <span class="teacher-meta-label">Docente</span>
+          <span class="teacher-meta-value" id="teacher-name">-</span>
+        </div>
+        <div class="teacher-meta-item">
+          <span class="teacher-meta-label">Correo</span>
+          <span class="teacher-meta-value" id="teacher-email">-</span>
+        </div>
+        <div class="teacher-meta-item">
+          <span class="teacher-meta-label">Ultima actualizacion</span>
+          <span class="teacher-meta-value" id="teacher-updated">-</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="teacher-main">
+      <section class="teacher-stats" id="teacher-stats">
+        <article class="metric-card metric-card--highlight">
+          <div class="metric-icon metric-icon--students" aria-hidden="true"></div>
+          <div class="metric-content">
+            <span class="metric-label">Estudiantes asignados</span>
+            <span class="metric-value" id="stat-total">0</span>
+            <span class="metric-hint" id="stat-highlight">Sin coincidencias por ahora.</span>
+          </div>
+        </article>
+        <article class="metric-card">
+          <header class="metric-header">
+            <span class="metric-icon metric-icon--calendar" aria-hidden="true"></span>
+            <div class="metric-header-text">
+              <span class="metric-label">Distribución por año</span>
+              <span class="metric-hint" id="stat-top-year">Sin datos</span>
+            </div>
+          </header>
+          <ul id="stat-years" class="metric-list"></ul>
+        </article>
+        <article class="metric-card">
+          <header class="metric-header">
+            <span class="metric-icon metric-icon--specialty" aria-hidden="true"></span>
+            <div class="metric-header-text">
+              <span class="metric-label">Especialidades principales</span>
+              <span class="metric-hint" id="stat-top-spec">Sin datos</span>
+            </div>
+          </header>
+          <ul id="stat-specs" class="metric-list"></ul>
+        </article>
+      </section>
+
+      <section class="teacher-grid">
+        <article class="card teacher-card teacher-card--profile" id="teacher-profile-card">
+          <header class="card-header">
+            <div>
+              <h2>Mi perfil docente</h2>
+              <p class="muted">Define los años y especialidades que impartes para que MathBot asigne alumnos automaticamente.</p>
+            </div>
+            <button class="btn btn-ghost" id="teacher-refresh" type="button">Actualizar datos</button>
+          </header>
+          <form id="teacher-profile-form" class="teacher-form" autocomplete="off">
+            <fieldset>
+              <legend>Años que impartes</legend>
+              <p class="fieldset-hint">Selecciona todos los grados donde acompañas a estudiantes.</p>
+              <label class="chip">
+                <input type="checkbox" name="docente_anios" value="1" /> 1er año
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="docente_anios" value="2" /> 2do año
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="docente_anios" value="3" /> 3er año
+              </label>
+            </fieldset>
+            <fieldset>
+              <legend>Especialidades</legend>
+              <p class="fieldset-hint">Usamos esta informacion para vincularte con cohortes relevantes.</p>
+              <label class="chip">
+                <input type="checkbox" name="docente_especialidades" value="Software" /> Software
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="docente_especialidades" value="Automotriz" /> Automotriz
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="docente_especialidades" value="General" /> General
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="docente_especialidades" value="Salud" /> Salud
+              </label>
+            </fieldset>
+            <label class="teacher-notes">
+              Notas internas
+              <textarea name="docente_notas" id="docente-notas" rows="3" placeholder="Informacion adicional o recordatorios"></textarea>
+            </label>
+            <div class="teacher-form-actions">
+              <button class="btn btn-primary" type="submit">Guardar perfil</button>
+              <span class="muted" id="teacher-profile-feedback"></span>
+            </div>
+          </form>
+        </article>
+
+        <article class="card teacher-card teacher-card--students" id="teacher-students-card">
+          <header class="card-header">
+            <div>
+              <h2>Estudiantes asignados</h2>
+              <p class="muted">Visualiza, filtra y da seguimiento a tu cohorte.</p>
+            </div>
+            <div class="teacher-toolbar">
+              <input type="search" id="teacher-search" placeholder="Buscar por nombre o email" />
+              <select id="teacher-filter-year">
+                <option value="">Año</option>
+                <option value="1">1er año</option>
+                <option value="2">2do año</option>
+                <option value="3">3er año</option>
+              </select>
+              <select id="teacher-filter-spec">
+                <option value="">Especialidad</option>
+                <option value="Software">Software</option>
+                <option value="Automotriz">Automotriz</option>
+                <option value="General">General</option>
+                <option value="Salud">Salud</option>
+              </select>
+              <button class="btn btn-ghost" id="teacher-clear" type="button">Limpiar</button>
+            </div>
+          </header>
+          <div class="teacher-table-wrapper">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Nivel</th>
+                  <th>Año</th>
+                  <th>Especialidad</th>
+                  <th>Progreso</th>
+                  <th>Asignado</th>
+                </tr>
+              </thead>
+              <tbody id="teacher-students-body">
+                <tr class="empty-row">
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <strong>No hay coincidencias todavia</strong>
+                      <span>Ajusta los filtros o actualiza tu perfil docente.</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="teacher-table-footer">
+            <span id="teacher-students-count" class="muted"></span>
+            <div class="pager">
+              <button class="btn btn-ghost" id="teacher-prev" type="button">Anterior</button>
+              <button class="btn btn-ghost" id="teacher-next" type="button">Siguiente</button>
+            </div>
+          </footer>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
+
+

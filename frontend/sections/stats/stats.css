@@ -1,0 +1,163 @@
+/* stats.css */
+
+.section-header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: clamp(24px, 3.4vw, 30px);
+  font-weight: 900;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.section-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.stats-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 1.8rem;
+}
+
+.stat-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  background: rgba(255,255,255,0.85);
+}
+
+body.dark .stat-card {
+  background: rgba(16,16,32,0.45);
+}
+
+.stat-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-detail {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.stats-grid .progress {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148,163,184,.2);
+  overflow: hidden;
+}
+
+.stats-grid .progress-bar {
+  height: 100%;
+  background: var(--grad);
+  width: 0;
+  transition: width .3s ease;
+}
+
+.stats-charts {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-bottom: 2rem;
+  align-items: stretch;
+}
+
+.chart-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: rgba(255,255,255,0.92);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+  height: 260px;
+  overflow: hidden;
+}
+
+.chart-card canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.dark .chart-card {
+  background: rgba(16,16,32,0.55);
+}
+
+.chart-card h3 {
+  margin: 0;
+}
+
+.stats-recommendations {
+  display: grid;
+  gap: 12px;
+}
+
+.recommendations-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.recommendation-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  background: rgba(236,72,153,.08);
+}
+
+body.dark .recommendation-card {
+  background: rgba(236,72,153,.12);
+}
+
+.recommendation-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.recommendation-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.recommendation-card .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .chart-card {
+    height: 220px;
+  }
+}

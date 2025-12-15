@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathBot.IA - Consola</title>
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="consola.css" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220" />
+  <style>html,body{height:100%}</style>
+</head>
+<body>
+  <div class="console-dashboard">
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+    <aside class="console-sidebar">
+      <div class="sidebar-header">
+        <button id="btn-dashboard" class="btn-small" aria-label="Ir al inicio">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Inicio
+        </button>
+      </div>
+
+      <div class="sidebar-header">
+        <h2>Chats</h2>
+        <button id="new-chat-btn" class="btn-small pulse" aria-label="Nuevo chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          Nuevo
+        </button>
+      </div>
+      <div class="sidebar-search">
+        <input id="chat-search" type="text" placeholder="Buscar chats" />
+      </div>
+      <ul id="chat-list" class="chat-list"></ul>
+    </aside>
+
+    <!-- =========================
+         MAIN CONSOLE
+    ========================== -->
+    <main class="console-main">
+      <!-- Header -->
+      <div class="console-header">
+        <span id="current-chat-title">Selecciona un chat</span>
+        <div>
+          <button id="summarize-chat-btn" class="btn-small" title="Resumir chat" aria-label="Resumir chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M4 4h16M4 12h10M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Resumen
+          </button>
+          <button id="clear-chat-btn" class="btn-small" title="Limpiar chat" aria-label="Limpiar chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 6h18M8 6v12a2 2 0 002 2h4a2 2 0 002-2V6M9 6l1-2h4l1 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="theme-toggle" class="btn-small" title="Cambiar tema" aria-label="Cambiar tema"></button>
+          <button id="scroll-bottom-btn" class="btn-small scroll-bottom-btn" title="Ir al final" aria-label="Ir al final">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Nuevos
+          </button>
+          <span id="console-status" class="console-status">Desconectado</span>
+        </div>
+      </div>
+
+      <!-- Chat Output -->
+      <div id="console-page" class="console-page">
+        <div id="console-output" class="console-output">
+          <div class="empty-msg">No hay mensajes aun.</div>
+        </div>
+        
+      </div>
+
+      <!-- Footer / Input -->
+      <div class="console-footer">
+        <div class="input-wrap">
+          <div class="student-toolbar" id="student-toolbar">
+            <div class="mode-switch" role="radiogroup" aria-label="Modo de ayuda">
+              <label><input type="radio" name="chat-mode" value="leccion" checked> Modo lecciones</label>
+              <label><input type="radio" name="chat-mode" value="general"> Modo libre</label>
+            </div>
+            <label><input type="checkbox" id="opt-steps"> Paso a paso</label>
+            <label><input type="checkbox" id="opt-simple"> Explicacion simple</label>
+            <label><input type="checkbox" id="opt-examples"> Con ejemplos</label>
+            <label><input type="checkbox" id="opt-verify"> Verificar solucion</label>
+            <button id="help-toggle" class="btn-small" title="Ayuda de uso" aria-label="Ayuda de uso">Ayuda</button>
+          </div>
+          <textarea id="console-command" rows="1" placeholder="Escribe tu mensaje" disabled></textarea>
+          <div class="input-hint" id="input-hint" style="display:none">
+            Sugerencia: Enter envia, Shift+Enter hace salto de linea. Para formulas usa $...$ o \\( ... \\).
+          </div>
+        </div>
+
+        <button id="send-btn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Enviar
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- =========================
+       Scripts
+  ========================== -->
+  <!-- Consola -->
+  <script type="module" src="modules/consola.js"></script>
+
+  <!-- Markdown parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- MathJax para renderizar expresiones matematicas -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\(', '\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+</html>
+
+
+
+

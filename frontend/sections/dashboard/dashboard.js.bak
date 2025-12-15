@@ -1,0 +1,392 @@
+﻿// =============================
+// DASHBOARD JS (Adaptado SPA)
+// =============================
+
+// Estado global
+const state = {
+  theme: localStorage.getItem("theme") || "light",
+  currentView: localStorage.getItem("currentView") || "welcome",
+  user: {
+    name: "Paola",
+    level: "Nivel 1Â° AÃ±o de Bachillerato",
+  },
+  stats: {
+    questions: 124,
+    minutes: 225,
+    progress: 65,
+    lessonsCompleted: "8/12",
+    points: 450,
+    lastAchievement: 'Maestro de fracciones',
+  },
+};
+
+// =============================
+// INICIO
+// =============================
+document.addEventListener("DOMContentLoaded", () => {
+  // Guard de autenticaciÃ³n
+  const auth = getAuth();
+  if (!auth) {
+    // Si no hay sesiÃ³n, redirige al login
+    window.location.replace("../auth/login.html");
+    return;
+  }
+
+  // Actualiza nombre en estado para plantillas
+  state.user.name = auth.name || state.user.name;
+  state.user.level = auth.level ? `Nivel ${auth.level}` : state.user.level;
+
+  initTheme();
+  renderUser();
+  renderStats();
+  initCharts();
+  initMenu();
+});
+
+function getAuth() {
+  try {
+    const raw = localStorage.getItem("mb_auth");
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (obj && obj.id) return obj;
+  } catch {}
+  return null;
+}
+
+function renderUser() {
+  const el = document.getElementById("user-first-name");
+  if (el) el.textContent = state.user.name;
+}
+
+// =============================
+// TEMA (light / dark)
+// =============================
+function initTheme() {
+  applyTheme(state.theme);
+
+  const btn = document.getElementById("theme-toggle");
+  btn?.addEventListener("click", () => {
+    state.theme = state.theme === "light" ? "dark" : "light";
+    localStorage.setItem("theme", state.theme);
+    applyTheme(state.theme);
+    // Actualiza estilos de charts al cambiar tema
+    updateChartsTheme();
+  });
+}
+
+function applyTheme(theme) {
+  document.body.classList.toggle("dark", theme === "dark");
+}
+
+// =============================
+// ESTADÃSTICAS
+// =============================
+function renderStats() {
+  const { questions, minutes, progress, lessonsCompleted, points, lastAchievement } = state.stats;
+
+  document.getElementById("stat-questions").textContent = questions;
+  document.getElementById("stat-minutes").textContent = `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+  document.getElementById("stat-progress").style.width = `${progress}%`;
+  document.getElementById("stat-progress-label").textContent = `${progress}%`;
+  document.getElementById("stat-lessons").textContent = lessonsCompleted;
+
+  const pointCard = document.querySelector('#section-content .stat:nth-child(5) .big');
+  if (pointCard) pointCard.textContent = `â­ ${points}`;
+
+  const achievementCard = document.querySelector('#section-content .stat:nth-child(6) p');
+  if (achievementCard) achievementCard.textContent = `ðŸ† "${lastAchievement}"`;
+}
+
+// =============================
+// Utilidades CSS variables
+// =============================
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function hexToRgba(hex, alpha = 1) {
+  const h = hex.replace('#', '').trim();
+  if (h.length === 3) {
+    const r = parseInt(h[0] + h[0], 16);
+    const g = parseInt(h[1] + h[1], 16);
+    const b = parseInt(h[2] + h[2], 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  if (h.length === 6) {
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  // fallback
+  return hex;
+}
+
+// =============================
+// GRÃFICAS (colores desde CSS vars)
+// =============================
+const charts = { week: null, areas: null };
+
+function initCharts() {
+  const weekCanvas = document.getElementById("chart-week");
+  const areasCanvas = document.getElementById("chart-areas");
+
+  [weekCanvas, areasCanvas].forEach(c => { if (c?.parentElement) c.parentElement.style.maxHeight = "300px"; });
+
+  const rosa = cssVar('--rosa') || '#ff6fb5';
+  const rojo = cssVar('--rojo') || '#ff3366';
+  const naranja = cssVar('--naranja') || '#ff914d';
+  const violeta = cssVar('--violeta') || '#9c27b0';
+  const muted = cssVar('--muted') || '#775f72';
+  const line = cssVar('--line') || '#f2d6cf';
+
+  if (weekCanvas) {
+    charts.week = new Chart(weekCanvas, {
+      type: "line",
+      data: {
+        labels: ["Lun", "Mar", "MiÃ©", "Jue", "Vie", "SÃ¡b", "Dom"],
+        datasets: [{
+          label: "Progreso semanal",
+          data: [10, 15, 12, 20, 18, 22, 25],
+          borderColor: rosa,
+          backgroundColor: hexToRgba(rosa, 0.22),
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: muted }, grid: { color: hexToRgba(line, 0.6) } },
+          y: { beginAtZero: true, max: 30, ticks: { color: muted }, grid: { color: hexToRgba(line, 0.6) } }
+        }
+      },
+    });
+  }
+
+  if (areasCanvas) {
+    charts.areas = new Chart(areasCanvas, {
+      type: "bar",
+      data: {
+        labels: ["Ãlgebra", "GeometrÃ­a", "CÃ¡lculo"],
+        datasets: [{
+          label: "Horas de estudio",
+          data: [5, 3, 2],
+          backgroundColor: [rojo, naranja, violeta],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: muted }, grid: { color: hexToRgba(line, 0.6) } },
+          y: { beginAtZero: true, ticks: { color: muted }, grid: { color: hexToRgba(line, 0.6) } }
+        }
+      },
+    });
+  }
+}
+
+function updateChartsTheme() {
+  const muted = cssVar('--muted') || '#775f72';
+  const line = cssVar('--line') || '#f2d6cf';
+  // actualizar colores de ejes y grids
+  if (charts.week) {
+    charts.week.options.scales.x.ticks.color = muted;
+    charts.week.options.scales.x.grid.color = hexToRgba(line, 0.6);
+    charts.week.options.scales.y.ticks.color = muted;
+    charts.week.options.scales.y.grid.color = hexToRgba(line, 0.6);
+    charts.week.update();
+  }
+  if (charts.areas) {
+    charts.areas.options.scales.x.ticks.color = muted;
+    charts.areas.options.scales.x.grid.color = hexToRgba(line, 0.6);
+    charts.areas.options.scales.y.ticks.color = muted;
+    charts.areas.options.scales.y.grid.color = hexToRgba(line, 0.6);
+    charts.areas.update();
+  }
+}
+
+// =============================
+// MENÃš SPA
+// =============================
+function initMenu() {
+  ensureGamesLink();
+  const links = document.querySelectorAll(".menu a");
+
+  links.forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      // Desactivar todos
+      links.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+
+      // Cargar la secciÃ³n SPA
+      loadSection(link.dataset.section);
+    });
+  });
+}
+
+function ensureGamesLink() {
+  const menuUl = document.querySelector('.menu ul');
+  if (!menuUl) return;
+  const exists = !!menuUl.querySelector('[data-section="games"]');
+  if (exists) return;
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.href = '#';
+  a.dataset.section = 'games';
+  a.textContent = 'Mini juegos';
+  li.appendChild(a);
+  // Insert after lessons if possible
+  const lessonsLi = menuUl.querySelector('[data-section="lessons"]')?.parentElement;
+  if (lessonsLi && lessonsLi.nextSibling) {
+    menuUl.insertBefore(li, lessonsLi.nextSibling);
+  } else {
+    menuUl.appendChild(li);
+  }
+}
+
+
+function showSection(sectionId) {
+  const sections = document.querySelectorAll("#section-content section");
+
+  sections.forEach(s => {
+    if (s.id === sectionId) {
+      s.hidden = false;
+      s.classList.add("active-section");
+    } else {
+      s.hidden = true;
+      s.classList.remove("active-section");
+    }
+  });
+}
+
+function loadSection(section) {
+  const container = document.getElementById("section-content");
+
+  // Si es dashboard (inicio), no hacemos fetch
+  if (section === "dashboard") {
+    document.querySelectorAll("#section-content section").forEach(s => s.remove());
+    container.innerHTML = `
+<section id="dashboard" class="fade-in active-section">
+  <h2>Hola, <span id="user-first-name">${state.user.name}</span> ðŸ‘‹</h2>
+  <p>Bienvenida a tu panel de estudiante. AquÃ­ puedes ver tu progreso y estadÃ­sticas recientes.</p>
+
+  <!-- Acciones rÃ¡pidas -->
+  <div class="quick-actions">
+    <a href="../consola/consola.html" class="btn btn-primary">ðŸ’¬ Abrir Consola</a>
+    <button class="btn btn-ghost" data-action="continue-lesson">â–¶ Continuar LecciÃ³n</button>
+    <button class="btn btn-ghost" data-action="new-lesson">âž• Nueva lecciÃ³n</button>
+    <button class="btn btn-ghost" data-action="view-ranking">ðŸ… Ver Ranking</button>
+  </div>
+
+  <!-- EstadÃ­sticas rÃ¡pidas -->
+  <div class="cards-grid" style="margin-top: 2rem;">
+    <div class="card stat">
+      <h3>Preguntas realizadas</h3>
+      <p class="big" id="stat-questions">124</p>
+    </div>
+    <div class="card stat">
+      <h3>Tiempo de estudio</h3>
+      <p class="big" id="stat-minutes">3h 45m</p>
+    </div>
+    <div class="card stat progress-card">
+      <h3>Avance total</h3>
+      <div class="progress">
+        <div class="progress-bar" id="stat-progress" style="width: 65%;"></div>
+      </div>
+      <p class="small" id="stat-progress-label">65%</p>
+    </div>
+    <div class="card stat">
+      <h3>Lecciones completadas</h3>
+      <p class="big" id="stat-lessons">8/12</p>
+    </div>
+    <div class="card stat">
+      <h3>Puntos</h3>
+      <p class="big">â­ 450</p>
+    </div>
+    <div class="card stat">
+      <h3>Ãšltimo logro</h3>
+      <p>ðŸ† "Maestro de fracciones"</p>
+    </div>
+  </div>
+
+  <!-- GrÃ¡ficas -->
+  <div class="cards-grid" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>Progreso semanal</h3>
+      <canvas id="chart-week" height="160"></canvas>
+    </div>
+    <div class="card">
+      <h3>Ãreas mÃ¡s estudiadas</h3>
+      <canvas id="chart-areas" height="160"></canvas>
+    </div>
+  </div>
+</section>`;
+    renderUser();
+    renderStats();
+    initCharts();
+    return;
+  }
+
+  // Para las demÃ¡s secciones
+  fetch(`../${section}/${section}.html`)
+    .then(res => {
+      if (!res.ok) throw new Error("No se pudo cargar la secciÃ³n");
+      return res.text();
+    })
+    .then(html => {
+      container.innerHTML = html;
+
+      // Evitar cargar el script dos veces
+      if (!document.querySelector(`script[src="../${section}/${section}.js"]`)) {
+        const script = document.createElement("script");
+        script.src = `../${section}/${section}.js`;
+        script.defer = true;
+        script.onload = () => {
+          if (section === "lessons" && window.initLessonsSection) window.initLessonsSection();
+          if (section === "settings" && window.initSettingsSection) window.initSettingsSection();
+          if (section === "games" && window.initGamesSection) window.initGamesSection();
+        };
+        document.body.appendChild(script);
+      }
+    })
+    .catch(err => {
+      container.innerHTML = `<p style="color:red;">Error al cargar la secciÃ³n: ${section}</p>`;
+      console.error(err);
+    });
+}
+
+// =============================
+// Eventos del menÃº
+// =============================
+document.querySelectorAll(".menu a").forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+
+    // Activar link
+    document.querySelectorAll(".menu a").forEach(l => l.classList.remove("active"));
+    link.classList.add("active");
+
+    // Cargar la secciÃ³n  
+    loadSection(link.dataset.section);
+  });
+});
+
+// =============================
+// SPA Helper: ir a Inicio
+// =============================
+function goToHome() {
+  document.querySelectorAll(".menu a").forEach(l => l.classList.remove("active"));
+  const homeLink = document.querySelector('.menu a[data-section="dashboard"]');
+  if(homeLink) homeLink.classList.add("active");
+  loadSection("dashboard");
+}
+window.goToHome = goToHome;
+

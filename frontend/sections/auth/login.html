@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathBot.IA - Iniciar sesion</title>
+  <link rel="stylesheet" href="../../css/global.css" />
+  <style>
+    body.auth-hide { visibility: hidden; }
+    .auth-container { position:relative; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem; background: var(--grad-soft); overflow:hidden; }
+    .auth-container::before, .auth-container::after { content:""; position:absolute; border-radius:50%; filter: blur(40px); opacity:.35; pointer-events:none; }
+    .auth-container::before { width:420px; height:420px; left:-120px; top:-120px; background: radial-gradient(closest-side, rgba(255,111,181,.55), transparent 70%); }
+    .auth-container::after  { width:520px; height:520px; right:-180px; bottom:-180px; background: radial-gradient(closest-side, rgba(255,51,102,.45), transparent 72%); }
+    .auth-card { width:100%; max-width:520px; padding:1.5rem; box-shadow: var(--shadow-lg); backdrop-filter: blur(6px); }
+    .auth-card h2 { margin:.25rem 0; font-size:1.6rem; letter-spacing:.2px; }
+    .auth-card .subtitle { margin-top:.2rem; color:var(--muted); font-size:.95rem; }
+    .field { display:flex; flex-direction:column; gap:.45rem; margin:1rem 0; }
+    .field label { font-weight:700; font-size:.92rem; color:#6c4b60; }
+    .field input, .field select { padding:.9rem 1rem; border-radius:12px; border:1px solid var(--line); background:#fff; color:var(--text); transition:var(--trans); }
+    html[data-theme='dark'] .field input, html[data-theme='dark'] .field select, body.dark .field input, body.dark .field select { background:#2a1620; }
+    .field input:focus, .field select:focus { outline:none; border-color:var(--rosa); box-shadow:0 0 0 4px rgba(255,111,181,.12); background:#fff; }
+    .multi-options { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.4rem; }
+    .multi-options label { display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .75rem; border-radius:999px; border:1px solid var(--line); background:rgba(255,111,181,.08); font-size:.85rem; white-space:nowrap; }
+    .multi-options input { accent-color:var(--rosa); margin:0; }
+    .field input:invalid, .field select:invalid { border-color:var(--danger); }
+    .actions { display:flex; gap:.8rem; align-items:center; justify-content:space-between; margin-top:1.1rem; }
+    .actions .btn { flex:1; justify-content:center; }
+    .actions .btn-ghost { flex:0 0 auto; }
+    .muted { color:var(--muted); font-size:.9rem; }
+    .center { text-align:center; }
+    .brand-logo { height:48px; filter:drop-shadow(0 6px 16px rgba(255,51,102,.18)); }
+    #auth-error { padding:.5rem .75rem; border-radius:10px; margin-top:.25rem; background:rgba(255,0,0,.06); }
+    @media (max-width:520px) {
+      .auth-card { padding:1rem; max-width:92vw; }
+      .actions { flex-direction:column; align-items:stretch; }
+      .actions .btn-ghost { width:100%; text-align:center; }
+    }
+  </style>
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        var theme = (stored === 'dark' || stored === 'light') ? stored : ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (err) {
+        console.warn('theme bootstrap error', err);
+      }
+    })();
+  </script>
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('mb_auth');
+        if (!raw) return;
+        var session = JSON.parse(raw);
+        var hasId = !!(session && ((session.user && session.user.id) || session.id));
+        var token = (session && (session.token || session.access_token)) || '';
+        if (!hasId || !token) return;
+        var API_BASE = localStorage.getItem('mb_api_base') || 'http://127.0.0.1:8000';
+        fetch(API_BASE + '/account/me', { headers: { 'Authorization': 'Bearer ' + token } })
+          .then(function(res){
+            if (!res.ok) {
+              if (res.status === 401) { try { localStorage.removeItem('mb_auth'); } catch(e){} }
+              return null;
+            }
+            return res.json().then(function(data){
+              var role = ((data && data.user && data.user.rol) || '').toLowerCase();
+              var teacherRoles = ['maestro','maestra','docente','profesor','profesora','teacher'];
+              var target = teacherRoles.indexOf(role) >= 0 ? '../teacher/panel.html' : '../dashboard/dashboard.html';
+              window.location.replace(target);
+            }).catch(function(){ window.location.replace('../dashboard/dashboard.html'); });
+          })
+          .catch(function(){ /* ignore */ });
+      } catch (err) {
+        console.warn('autologin error', err);
+      }
+    })();
+  </script>
+  <script src="../../js/theme.js" defer></script>
+  <script src="login.js" defer></script>
+  <link rel="icon" href="../../assets/img/MATHBOT ICONO.png" />
+  <link rel="apple-touch-icon" href="../../assets/img/MATHBOT ICONO.png" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220" />
+</head>
+<body class="auth-hide">
+  <div class="auth-container">
+    <div class="card glass auth-card">
+      <div class="center" style="margin-bottom:.6rem">
+        <img class="brand-logo" src="../../assets/img/MATHBOTLOGO 2.png" alt="MathBot.IA" />
+      </div>
+      <h2 class="center">Bienvenido a MathBot.IA</h2>
+      <p class="muted center subtitle">Inicia sesion para continuar</p>
+
+      <form id="auth-form" method="post" accept-charset="UTF-8">
+        <div class="field" style="margin-top:.2rem">
+          <label class="muted" style="font-weight:400">
+            <input type="checkbox" id="mode-register" /> No tienes cuenta? Crear cuenta
+          </label>
+        </div>
+        <div class="field" id="field-nombre" style="display:none">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" type="text" placeholder="Tu nombre completo" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="email">Correo</label>
+          <input id="email" name="email" type="text" inputmode="email" placeholder="tucorreo@ejemplo.com" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="password">Contrasena</label>
+          <input id="password" name="password" type="password" placeholder="Tu contrasena" autocomplete="current-password" required />
+          <label class="muted" style="font-weight:400; margin-top:.2rem">
+            <input type="checkbox" id="show-password" /> Mostrar contrasena
+          </label>
+        </div>
+        <div class="field" id="field-rol" style="display:none">
+          <label for="rol">Rol</label>
+          <select id="rol" name="rol">
+            <option value="estudiante">Estudiante</option>
+            <option value="docente">Docente</option>
+          </select>
+        </div>
+        <div class="field" id="field-nivel" style="display:none">
+          <label for="nivel">Nivel</label>
+          <select id="nivel" name="nivel">
+            <option value="1er Ano de Bachillerato">1er Ano de Bachillerato</option>
+            <option value="2do Ano de Bachillerato">2do Ano de Bachillerato</option>
+          </select>
+        </div>
+        <div class="field" id="field-especialidad" style="display:none">
+          <label for="especialidad">Especialidad (opcional)</label>
+          <select id="especialidad" name="especialidad">
+            <option value="">Selecciona (opcional)</option>
+            <option value="Software">Software</option>
+            <option value="Automotriz">Automotriz</option>
+            <option value="General">General</option>
+            <option value="Salud">Salud</option>
+          </select>
+        </div>
+        <div class="field" id="field-docente-anios" style="display:none">
+          <label>Años que impartes</label>
+          <div class="multi-options">
+            <label><input type="checkbox" name="docente_anios" value="1" /> 1er ano</label>
+            <label><input type="checkbox" name="docente_anios" value="2" /> 2do ano</label>
+            <label><input type="checkbox" name="docente_anios" value="3" /> 3er ano</label>
+          </div>
+        </div>
+        <div class="field" id="field-docente-especialidades" style="display:none">
+          <label>Especialidades que impartes</label>
+          <div class="multi-options">
+            <label><input type="checkbox" name="docente_especialidades" value="Software" /> Software</label>
+            <label><input type="checkbox" name="docente_especialidades" value="Automotriz" /> Automotriz</label>
+            <label><input type="checkbox" name="docente_especialidades" value="General" /> General</label>
+            <label><input type="checkbox" name="docente_especialidades" value="Salud" /> Salud</label>
+          </div>
+        </div>
+        <div class="field" id="field-docente-notas" style="display:none">
+          <label for="docente-notas">Notas para el panel (opcional)</label>
+          <textarea id="docente-notas" name="docente_notas" rows="3" placeholder="Ej. Grupo vespertino"></textarea>
+        </div>
+        <div id="auth-error" class="muted center" style="color:var(--danger);"></div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Continuar</button>
+          <a class="btn btn-ghost" href="../../index.html">Volver al inicio</a>
+        </div>
+      </form>
+
+      <p class="muted center" style="margin-top:1rem">Tus datos se envian con UTF-8; admite acentos y caracteres especiales.</p>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.remove('auth-hide');
+    });
+  </script>
+</body>
+</html>
+
+

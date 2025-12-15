@@ -1,0 +1,58 @@
+import os
+from functools import lru_cache
+from typing import List, Dict
+from openai import OpenAI
+from dotenv import load_dotenv
+
+
+def _ensure_openai_key() -> str:
+    key = os.getenv("OPENAI_API_KEY", "").strip()
+    if key:
+        return key
+    # Intentar cargar .env de ubicaciones conocidas si no está en el entorno
+    here = os.path.dirname(__file__)
+    candidates = [
+        os.path.join(here, ".env"),
+        os.path.join(os.path.dirname(here), ".env"),  # backend/.env
+        os.path.join(os.getcwd(), ".env"),           # cwd
+    ]
+    for enc in ("utf-8", "utf-8-sig", "cp1252", "latin-1"):
+        for p in candidates:
+            try:
+                if os.path.exists(p):
+                    load_dotenv(p, encoding=enc, override=True)
+            except Exception:
+                continue
+        key = os.getenv("OPENAI_API_KEY", "").strip()
+        if key:
+            return key
+    return ""
+
+
+@lru_cache(maxsize=1)
+def get_openai_client() -> OpenAI:
+    api_key = _ensure_openai_key()
+    if not api_key:
+        raise RuntimeError("Falta OPENAI_API_KEY en el archivo .env")
+    return OpenAI(api_key=api_key)
+
+
+def compose_system_prompt() -> str:
+    return (
+        "Eres MathiBot, un maestro de matemáticas paciente, didáctico y cariñoso. Responde usando Markdown.\n"
+        "Instrucciones de formato y estilo:\n"
+        "- Usa $$ ... $$ para ecuaciones en bloque.\n"
+        "- Usa \\( ... \\) para fórmulas en línea.\n"
+        "- Nunca uses corchetes [ ] para fórmulas.\n"
+        "- Explica paso a paso y verifica resultados.\n"
+        "- Mantén continuidad en la conversación. Sé amable y claro.\n"
+        "- Si se proporciona 'Lección X.Y — <Título>', no cambies ese nombre ni su numeración.\n"
+        "- Si no hay contexto suficiente de la BD, dilo explícitamente."
+    )
+
+
+def chat_completion(messages: List[Dict[str, str]], model: str = "gpt-4o-mini") -> str:
+    client = get_openai_client()
+    resp = client.chat.completions.create(model=model, messages=messages)
+    return resp.choices[0].message.content or ""
+

@@ -1,0 +1,74 @@
+<!-- profile.html -->
+<section id="profile" class="card fade-in">
+  <h2>Gestionar perfil</h2>
+  <div class="welcome-meta"><span class="pill" id="profile-level-summary">Nivel</span></div>
+  <p>Actualiza tus datos personales y preferencias académicas.</p>
+
+  <div class="cards-grid" style="margin-top:1.2rem;">
+    <div class="card">
+      <h3>Datos del perfil</h3>
+      <form id="profile-form" style="margin-top:.8rem">
+        <div class="field">
+          <label for="pf-nombre">Nombre</label>
+          <input id="pf-nombre" name="nombre" type="text" placeholder="Tu nombre" required />
+        </div>
+        <div class="field">
+          <label for="pf-email">Correo</label>
+          <input id="pf-email" name="email" type="email" placeholder="tucorreo@ejemplo.com" required />
+        </div>
+        <div class="field">
+          <label for="pf-nivel">Nivel</label>
+          <select id="pf-nivel" name="nivel">
+            <option value="1º Año de Bachillerato">1º Año de Bachillerato</option>
+            <option value="2º Año de Bachillerato">2º Año de Bachillerato</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="pf-especialidad">Especialidad (opcional)</label>
+          <select id="pf-especialidad" name="especialidad">
+            <option value="">Selecciona (opcional)</option>
+            <option value="Software">Software</option>
+            <option value="Automotriz">Automotriz</option>
+            <option value="General">General</option>
+            <option value="Salud">Salud</option>
+          </select>
+        </div>
+        <div id="pf-msg" class="muted" style="min-height:1.2rem;"></div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Guardar cambios</button>
+          <button class="btn btn-ghost" type="button" id="go-settings">Ir a configuración</button>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Sesión</h3>
+      <p class="muted">Cierra tu sesión actual en este dispositivo.</p>
+      <div class="actions" style="margin-top:1rem">
+        <button class="btn btn-danger" type="button" id="logout-btn">Cerrar sesión</button>
+      </div>
+      <div id="logout-msg" class="muted" style="min-height:1.2rem;margin-top:.6rem;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Seguridad</h3>
+      <form id="password-form" style="margin-top:.8rem">
+        <div class="field">
+          <label for="pw-actual">Contraseña actual</label>
+          <input id="pw-actual" type="password" name="current_password" required />
+        </div>
+        <div class="field">
+          <label for="pw-nueva">Nueva contraseña</label>
+          <input id="pw-nueva" type="password" name="new_password" required />
+        </div>
+        <div class="field">
+          <label for="pw-conf">Confirmar nueva contraseña</label>
+          <input id="pw-conf" type="password" name="confirm_password" required />
+        </div>
+        <div id="pw-msg" class="muted" style="min-height:1.2rem;"></div>
+        <div class="actions">
+          <button class="btn btn-ghost" type="submit">Actualizar contraseña</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

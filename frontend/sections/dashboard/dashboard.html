@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathBot.IA &mdash; Dashboard Estudiante</title>
+
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        var theme = (stored === 'dark' || stored === 'light') ? stored : ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (err) {
+        console.warn('theme bootstrap error', err);
+      }
+    })();
+  </script>
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- CSS del dashboard -->
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <style>
+    /* Evitar parpadeo: oculta hasta verificar sesión */
+    body.dash-hide { visibility: hidden; }
+  </style>
+  <script>
+    // Redirección temprana si no hay sesión válida
+    (function() {
+      try {
+        var raw = localStorage.getItem('mb_auth');
+        var ok = false;
+        if (raw) {
+          var a = JSON.parse(raw);
+          var hasId = !!(a && ((a.user && a.user.id) || a.id));
+          var hasToken = !!(a && (a.token || a.access_token));
+          ok = hasId && hasToken;
+        }
+        if (!ok) {
+          window.location.replace('../auth/login.html');
+        }
+      } catch (e) {
+        window.location.replace('../auth/login.html');
+      }
+    })();
+  </script>
+
+  <!-- Librería para gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+  <script src="../../js/theme.js" defer></script>
+  <!-- Modulos compartidos -->
+  <script src="../../js/lessons-data.js" defer></script>
+  <script src="../../js/progress-store.js" defer></script>
+
+  <!-- JS del dashboard -->
+  <script src="dashboard.js" defer></script>
+</head>
+<body class="dash-hide">
+  <div class="dashboard-container">
+
+    <!-- Sidebar / Menú lateral -->
+    <aside class="sidebar glass">
+      <div class="brand">
+        <img src="../../assets/img/MATHBOTLOGO 2.png" alt="MathBot.IA" class="brand-logo" />
+      </div>
+
+      <nav class="menu">
+        <ul>
+          <li><a href="#" data-section="dashboard" class="active">🏠 Inicio</a></li>
+          <li><a href="#" data-section="lessons">📘 Lecciones</a></li>
+          <li><a href="#" data-section="achievements">🏆 Logros</a></li>
+          <li><a href="#" data-section="stats">📊 Estadísticas</a></li>
+          <li><a href="#" data-section="settings">⚙️ Configuración</a></li>
+          <li><a href="#" data-section="profile">👤 Perfil</a></li>
+        </ul>
+      </nav>
+
+      <!-- Botón de tema -->
+      <div class="theme-toggle-wrapper">
+        <button id="theme-toggle" class="btn btn-ghost" aria-pressed="false">🌙 Tema oscuro</button>
+      </div>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="dashboard-main">
+
+      <!-- Contenedor dinámico de secciones -->
+      <div id="section-content">
+
+        <!-- INICIO -->
+       <section id="dashboard" class="fade-in active-section">
+  <h2>Hola, <span id="user-first-name">Paola</span> 👋</h2>
+  <div class="welcome-meta">
+    <span class="pill" id="user-level">Nivel 1° Año de Bachillerato</span>
+  </div>
+  <p>Bienvenida a tu panel de estudiante. Aquí puedes ver tu progreso y estadísticas recientes.</p>
+
+  <!-- Acciones rápidas -->
+  <div class="quick-actions">
+    <a href="../consola/consola.html" class="btn btn-primary">💬 Abrir Consola</a>
+    <button class="btn btn-ghost" data-action="continue-lesson">▶ Continuar Lección</button>
+    <button class="btn btn-ghost" data-action="new-lesson">➕ Nueva lección</button>
+    <button class="btn btn-ghost" data-action="view-ranking">🏅 Ver Ranking</button>
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="cards-grid" style="margin-top: 2rem;">
+    <div class="card stat">
+      <h3>Preguntas realizadas</h3>
+      <p class="big" id="stat-questions">124</p>
+    </div>
+    <div class="card stat">
+      <h3>Tiempo de estudio</h3>
+      <p class="big" id="stat-minutes">3h 45m</p>
+    </div>
+    <div class="card stat progress-card">
+      <h3>Avance total</h3>
+      <div class="progress">
+        <div class="progress-bar" id="stat-progress" style="width: 65%;"></div>
+      </div>
+      <p class="small" id="stat-progress-label">65%</p>
+    </div>
+    <div class="card stat">
+      <h3>Lecciones completadas</h3>
+      <p class="big" id="stat-lessons">8/12</p>
+    </div>
+    <div class="card stat">
+      <h3>Puntos</h3>
+      <p class="big">⭐ 450</p>
+    </div>
+    <div class="card stat">
+      <h3>Último logro</h3>
+      <p>🏆 "Maestro de fracciones"</p>
+    </div>
+  </div>
+
+  <!-- Gráficas -->
+  <div class="cards-grid" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>Progreso semanal</h3>
+      <canvas id="chart-week" height="160"></canvas>
+    </div>
+    <div class="card">
+      <h3>Áreas más estudiadas</h3>
+      <canvas id="chart-areas" height="160"></canvas>
+    </div>
+  </div>
+</section>
+
+      </div>
+    </main>
+  </div>
+  <script>
+    // Mostrar una vez que el contenido está listo y la sesión es válida
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.remove('dash-hide');
+    });
+  </script>
+</body>
+</html>
+
+
