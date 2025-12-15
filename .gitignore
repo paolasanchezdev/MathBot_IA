@@ -1,12 +1,21 @@
-﻿.venv/
+﻿# ----------------------------------------------------------------------
+# Configuracion de Entorno y Dependencias
+# ----------------------------------------------------------------------
+
+# 1. Ignorar el archivo de variables REALES (SECRETO)
+#    Esto ignora el archivo en la raíz y en la carpeta backend/
+.env
+backend/.env
+
+# 2. Ignorar el entorno virtual (VIRTUAL ENVIRONMENT)
+.venv/
+
+# 3. Ignorar archivos de Python compilados y temporales
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.env
-.env.*
 
-backend/.env
-.venv/
-__pycache__/
-*.pyc
+# ----------------------------------------------------------------------
+# NOTA: El archivo .env.example NO se ignora para que se suba a GitHub.
+# ----------------------------------------------------------------------
