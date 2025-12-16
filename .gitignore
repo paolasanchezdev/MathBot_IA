@@ -15,7 +15,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
+# Ignorar archivos temporales de entorno y respaldos
+*.tmp
 # ----------------------------------------------------------------------
 # NOTA: El archivo .env.example NO se ignora para que se suba a GitHub.
 # ----------------------------------------------------------------------

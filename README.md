@@ -1,13 +1,37 @@
-# MathBot.IA
+# 🧠 MathBot.IA: Sistema de Tutoría de Matemáticas Híbrido basado en IA
 
-MathBot.IA es una plataforma web para aprender matematicas que combina lecciones curadas, un chat impulsado por IA y un panel con estadisticas de avance. El repositorio contiene el backend (FastAPI + SQLite/PostgreSQL) y un frontend estatico con experiencias para estudiantes.
+MathBot.IA es una plataforma web para aprender matemáticas que combina lecciones curadas, un chat impulsado por IA y un panel con estadísticas de avance. El repositorio contiene el backend (FastAPI + SQLite/PostgreSQL) y un frontend estático con experiencias para estudiantes.
 
 ## Caracteristicas clave
-- Chat didactico respaldado por OpenAI, con memoria por usuario y contexto de la base de lecciones.
+- Chat didáctico respaldado por OpenAI, con memoria por usuario y contexto de la base de lecciones.
 - Panel tipo dashboard con progreso, logros, mini juegos y ajustes personales.
-- Modulos de autenticacion, gestion de usuarios y alumnos integrados con JWT.
+- Módulos de autenticación, gestión de usuarios y alumnos integrados con JWT.
 - Scripts para poblar lecciones y cuentas a partir de CSV o PDF.
-- Lanzamiento rapido en Windows mediante `run.bat` (levanta API y servidor estatico).
+- Lanzamiento rápido en Windows mediante `run.bat` (levanta API y servidor estático).
+
+---
+
+## Enfoque Pedagógico: La Arquitectura Híbrida de la Consola 
+
+La consola de chat es el núcleo del proyecto y está diseñada bajo un principio de **Educación Autónoma**, combinando la estructura de la base de datos con el poder de la Inteligencia Artificial (IA) para evitar la copia y fomentar el aprendizaje.
+
+### 1. Modo Lecciones (Estructura y Profundización)
+
+Este modo se enfoca en la **integración de datos estructurados** con la capacidad de ampliación de la IA, asegurando la calidad del currículo.
+
+* **Búsqueda Estructurada en PostgreSQL:** El sistema busca lecciones específicas (ej. "Lección 1.3, Unidad 3") en la base de datos. La búsqueda se realiza rigurosamente por **Unidad** y luego por **Lección**, garantizando la coherencia curricular.
+* **Ampliación Dinámica con IA:** La información base extraída de la base de datos se envía al modelo de Inteligencia Artificial para ser **ampliada, contextualizada y explicada** de forma detallada, transformando los datos estáticos en una explicación rica e interactiva.
+
+### 2. Modo Pregunta Libre (Autonomía y Generación de Ejercicios)
+
+Este modo garantiza un **aprendizaje dinámico y a medida** en tiempo real:
+
+* **Respuesta con IA Real:** El usuario puede hacer cualquier pregunta matemática y la IA genera la respuesta, actuando como un tutor conversacional.
+* **Principio de la No-Copia:** Si el usuario solicita la solución a un ejercicio, MathBot.IA no la entrega. En su lugar, el modelo de IA **genera un ejercicio similar**, obligando al estudiante a aplicar los conceptos por sí mismo.
+
+Este diseño asegura que MathBot.IA sea una herramienta de guía y tutoría que impulsa al usuario a la resolución autónoma de problemas.
+
+---
 
 ## Arquitectura
 ```
